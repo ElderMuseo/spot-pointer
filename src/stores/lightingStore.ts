@@ -6,6 +6,9 @@ import { TelnetClient } from '../utils/telnet';
 interface LightingStore extends LightingState {
   // Actions
   selectFixture: (id: number, multi?: boolean) => void;
+  selectAllFixtures: () => void;
+  clearSelection: () => void;
+  selectFixtureById: (id: number) => void;
   updateFixture: (id: number, updates: Partial<Fixture>) => void;
   setTargetPoint: (x: number, y: number) => void;
   aimFixtureAt: (fixtureId: number, x: number, y: number) => void;
@@ -66,15 +69,36 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
         }))
       };
     } else {
-      return {
-        selectedFixtures: [id],
-        fixtures: state.fixtures.map(f => ({
-          ...f,
-          isSelected: f.id === id
-        }))
-      };
+      // Single selection - if clicking same fixture, toggle it. Otherwise select only that one.
+      const isCurrentlySelected = state.selectedFixtures.includes(id) && state.selectedFixtures.length === 1;
+      if (isCurrentlySelected) {
+        return {
+          selectedFixtures: [],
+          fixtures: state.fixtures.map(f => ({ ...f, isSelected: false }))
+        };
+      } else {
+        return {
+          selectedFixtures: [id],
+          fixtures: state.fixtures.map(f => ({ ...f, isSelected: f.id === id }))
+        };
+      }
     }
   }),
+
+  selectAllFixtures: () => set(state => ({
+    selectedFixtures: state.fixtures.map(f => f.id),
+    fixtures: state.fixtures.map(f => ({ ...f, isSelected: true }))
+  })),
+
+  clearSelection: () => set(state => ({
+    selectedFixtures: [],
+    fixtures: state.fixtures.map(f => ({ ...f, isSelected: false }))
+  })),
+
+  selectFixtureById: (id: number) => set(state => ({
+    selectedFixtures: [id],
+    fixtures: state.fixtures.map(f => ({ ...f, isSelected: f.id === id }))
+  })),
 
   updateFixture: (id, updates) => set(state => ({
     fixtures: state.fixtures.map(f => 

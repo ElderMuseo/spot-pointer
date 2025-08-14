@@ -2,10 +2,12 @@ import React, { useEffect } from 'react';
 import { FloorPlan } from '../components/FloorPlan';
 import { ControlPanel } from '../components/ControlPanel';
 import { PresetManager } from '../components/PresetManager';
+import { FixtureList } from '../components/FixtureList';
+import { KeyboardShortcuts } from '../components/KeyboardShortcuts';
 import { useLightingStore } from '../stores/lightingStore';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Lightbulb, Target, Zap } from 'lucide-react';
+import { Lightbulb, Target, Zap, Keyboard } from 'lucide-react';
 
 const Index = () => {
   const { 
@@ -25,6 +27,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <KeyboardShortcuts />
+      
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="container mx-auto px-4 py-3">
@@ -56,6 +60,10 @@ const Index = () => {
                   </span>
                 </div>
               )}
+              <div className="flex items-center gap-2">
+                <Keyboard className="w-4 h-4" />
+                <span className="text-muted-foreground">1-6 keys</span>
+              </div>
               <div className={`px-2 py-1 rounded text-xs ${
                 telnetConfig.connected 
                   ? 'bg-primary/20 text-primary' 
@@ -70,32 +78,42 @@ const Index = () => {
 
       {/* Main Layout */}
       <div className="container mx-auto px-4 py-4 h-[calc(100vh-73px)]">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full">
+        <div className="grid grid-cols-1 xl:grid-cols-5 lg:grid-cols-4 gap-4 h-full">
           {/* Floor Plan - Main Area */}
-          <div className="lg:col-span-2 order-1">
+          <div className="xl:col-span-2 lg:col-span-2 order-1">
             <FloorPlan />
           </div>
           
-          {/* Control Panel */}
-          <div className="order-2 lg:order-2">
+          {/* Fixture List - Individual Controls */}
+          <div className="order-2 xl:order-2 lg:order-4">
+            <FixtureList />
+          </div>
+          
+          {/* Control Panel - Group Controls */}
+          <div className="order-3 xl:order-3 lg:order-2">
             <ControlPanel />
           </div>
           
           {/* Preset Manager */}
-          <div className="order-3 lg:order-3">
+          <div className="order-4 xl:order-4 lg:order-3">
             <PresetManager />
           </div>
         </div>
       </div>
 
-      {/* Quick Help Overlay */}
+      {/* Enhanced Quick Help Overlay */}
       <div className="fixed bottom-4 left-4 bg-card/90 backdrop-blur border border-border rounded-lg p-3 text-xs max-w-xs">
-        <div className="font-medium text-foreground mb-1">Quick Help</div>
+        <div className="font-medium text-foreground mb-2 flex items-center gap-1">
+          <Keyboard className="w-3 h-3" />
+          Quick Controls
+        </div>
         <div className="space-y-1 text-muted-foreground">
-          <div>• Click fixtures to select</div>
+          <div>• <kbd className="bg-muted px-1 rounded text-xs">1-6</kbd> Select fixtures</div>
+          <div>• <kbd className="bg-muted px-1 rounded text-xs">Shift+Click</kbd> Multi-select</div>
+          <div>• <kbd className="bg-muted px-1 rounded text-xs">Space</kbd> Full brightness</div>
+          <div>• <kbd className="bg-muted px-1 rounded text-xs">B</kbd> Blackout selected</div>
+          <div>• <kbd className="bg-muted px-1 rounded text-xs">Esc</kbd> Clear selection</div>
           <div>• Click map to aim selected fixtures</div>
-          <div>• Hold Shift for multi-select</div>
-          <div>• Save presets for quick recall</div>
         </div>
       </div>
     </div>
