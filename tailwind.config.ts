@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Custom lighting control colors
+				fixture: {
+					active: 'hsl(var(--fixture-active))',
+					inactive: 'hsl(var(--fixture-inactive))'
+				},
+				lightcone: 'hsl(var(--light-cone))',
+				gridline: 'hsl(var(--grid-line))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
