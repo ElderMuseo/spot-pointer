@@ -23,22 +23,22 @@ interface LightingStore extends LightingState {
 }
 
 const defaultFixtures: Fixture[] = [
-  // Left side fixtures (3)
-  { id: 1, x: 2, y: 8, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 2, x: 5, y: 8, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 3, x: 8, y: 8, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  // Right side fixtures (3)
-  { id: 4, x: 2, y: 2, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 5, x: 5, y: 2, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 6, x: 8, y: 2, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  // 1x6 configuration with bigger space in the middle
+  { id: 1, x: 1, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 2, x: 3, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 3, x: 4.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  // Bigger gap in the middle
+  { id: 4, x: 6.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 5, x: 8, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 6, x: 10, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
 ];
 
 export const useLightingStore = create<LightingStore>((set, get) => ({
   fixtures: defaultFixtures,
   floorPlan: {
     image: null,
-    width: 10,
-    height: 10,
+    width: 12,
+    height: 8,
     calibrationPoints: [],
     pixelsPerMeter: 50
   },

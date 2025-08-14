@@ -7,6 +7,7 @@ import { Slider } from './ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
 import { useLightingStore } from '../stores/lightingStore';
+import { FloorPlanUpload } from './FloorPlanUpload';
 import { Lightbulb, Palette, Circle, Settings, Wifi, WifiOff } from 'lucide-react';
 
 export const ControlPanel: React.FC = () => {
@@ -314,15 +315,7 @@ export const ControlPanel: React.FC = () => {
             </div>
 
             {/* Floor Plan Setup */}
-            <div className="space-y-2">
-              <Label>Floor Plan Dimensions</Label>
-              <div className="text-sm text-muted-foreground">
-                Current: 10m × 10m
-              </div>
-              <Button variant="outline" size="sm" className="w-full">
-                Load Floor Plan Image
-              </Button>
-            </div>
+            <FloorPlanUpload />
           </TabsContent>
         </Tabs>
       </CardContent>
