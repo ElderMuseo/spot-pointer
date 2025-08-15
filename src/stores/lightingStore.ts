@@ -126,7 +126,8 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     const fixture = state.fixtures.find(f => f.id === fixtureId);
     if (!fixture) return;
 
-    const { pan, tilt } = calculatePanTilt(fixture, x, y);
+    // Calculate pan/tilt with floor level target (z=0) and fixture height
+    const { pan, tilt } = calculatePanTilt(fixture, x, y, 0);
     
     // Convert to percentages for telnet
     if (state.telnetClient) {
