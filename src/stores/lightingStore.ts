@@ -27,13 +27,13 @@ interface LightingStore extends LightingState {
 
 const defaultFixtures: Fixture[] = [
   // 1x6 configuration with bigger space in the middle
-  { id: 1, x: 1, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 2, x: 3, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 3, x: 4.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 1, x: 1, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 1, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 2, x: 3, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 3, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 3, x: 4.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 4.5, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
   // Bigger gap in the middle
-  { id: 4, x: 6.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 5, x: 8, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 6, x: 10, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 4, x: 6.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 6.5, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 5, x: 8, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 8, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 6, x: 10, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 10, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
 ];
 
 export const useLightingStore = create<LightingStore>((set, get) => ({
@@ -124,21 +124,21 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   aimFixtureAt: (fixtureId, x, y) => {
     const state = get();
     const fixture = state.fixtures.find(f => f.id === fixtureId);
-    if (!fixture || !state.telnetClient) return;
+    if (!fixture) return;
 
     const { pan, tilt } = calculatePanTilt(fixture, x, y);
     
     // Convert to percentages for telnet
-    const panPercent = degreesToPercent(pan, fixture.panRange.min, fixture.panRange.max);
-    const tiltPercent = degreesToPercent(tilt, fixture.tiltRange.min, fixture.tiltRange.max);
+    if (state.telnetClient) {
+      const panPercent = degreesToPercent(pan, fixture.panRange.min, fixture.panRange.max);
+      const tiltPercent = degreesToPercent(tilt, fixture.tiltRange.min, fixture.tiltRange.max);
+      state.telnetClient.sendPanTilt(fixtureId, panPercent, tiltPercent);
+    }
     
-    // Send telnet commands
-    state.telnetClient.sendPanTilt(fixtureId, panPercent, tiltPercent);
-    
-    // Update local state
+    // Update local state - only update this fixture's target and position
     set(state => ({
       fixtures: state.fixtures.map(f => 
-        f.id === fixtureId ? { ...f, pan, tilt } : f
+        f.id === fixtureId ? { ...f, pan, tilt, targetX: x, targetY: y } : f
       ),
       targetPoint: { x, y }
     }));

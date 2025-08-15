@@ -116,16 +116,10 @@ export const FloorPlan: React.FC = () => {
         ctx.stroke();
       }
 
-      // Draw individual light cones for each selected fixture
-      selectedFixtures.forEach(fixtureId => {
-        const fixture = fixtures.find(f => f.id === fixtureId);
-        if (!fixture) return;
-
-        // Calculate target point for this fixture (use global target or fixture's current position)
-        const targetX = targetPoint?.x ?? fixture.x;
-        const targetY = targetPoint?.y ?? fixture.y + 2; // Default aim 2m forward
-
-        const cone = calculateLightCone(fixture, targetX, targetY, fixture.zoom);
+      // Draw individual light cones for ALL fixtures
+      fixtures.forEach(fixture => {
+        // Use fixture's individual target point
+        const cone = calculateLightCone(fixture, fixture.targetX, fixture.targetY, fixture.zoom);
         const centerPixel = realToPixel(cone.centerX, cone.centerY, {
           width: floorPlan.width,
           height: floorPlan.height,
@@ -133,12 +127,18 @@ export const FloorPlan: React.FC = () => {
         });
 
         // Use different colors for different fixtures
-        const hue = 45 + (fixtureId - 1) * 60; // Different hues for each fixture
+        const hue = 45 + (fixture.id - 1) * 60; // Different hues for each fixture
+        
+        // Selected fixtures have brighter, more opaque cones
+        const isSelected = fixture.isSelected;
+        const opacity = isSelected ? 0.25 : 0.1;
+        const strokeOpacity = isSelected ? 1 : 0.4;
+        const lineWidth = isSelected ? 2 : 1;
         
         // Draw cone
-        ctx.fillStyle = `hsl(${hue}, 95%, 60%, 0.15)`;
-        ctx.strokeStyle = `hsl(${hue}, 95%, 60%, 0.8)`;
-        ctx.lineWidth = 1;
+        ctx.fillStyle = `hsl(${hue}, 95%, 60%, ${opacity})`;
+        ctx.strokeStyle = `hsl(${hue}, 95%, 60%, ${strokeOpacity})`;
+        ctx.lineWidth = lineWidth;
         
         ctx.beginPath();
         ctx.ellipse(
@@ -153,19 +153,21 @@ export const FloorPlan: React.FC = () => {
         ctx.fill();
         ctx.stroke();
 
-        // Draw beam line from fixture to target
-        const fixturePixel = realToPixel(fixture.x, fixture.y, {
-          width: floorPlan.width,
-          height: floorPlan.height,
-          pixelsPerMeter
-        });
+        // Draw beam line from fixture to target (only for selected fixtures)
+        if (isSelected) {
+          const fixturePixel = realToPixel(fixture.x, fixture.y, {
+            width: floorPlan.width,
+            height: floorPlan.height,
+            pixelsPerMeter
+          });
 
-        ctx.strokeStyle = `hsl(${hue}, 95%, 60%, 0.6)`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(fixturePixel.x, fixturePixel.y);
-        ctx.lineTo(centerPixel.x, centerPixel.y);
-        ctx.stroke();
+          ctx.strokeStyle = `hsl(${hue}, 95%, 60%, 0.6)`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(fixturePixel.x, fixturePixel.y);
+          ctx.lineTo(centerPixel.x, centerPixel.y);
+          ctx.stroke();
+        }
       });
 
       // Draw fixtures

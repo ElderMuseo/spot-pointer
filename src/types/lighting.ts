@@ -14,6 +14,9 @@ export interface Fixture {
   gobo: number; // Gobo index
   zoom: number; // Beam angle/zoom
   isSelected: boolean;
+  // Individual target point for this fixture
+  targetX: number;
+  targetY: number;
   // Calibration settings
   panRange: { min: number; max: number };
   tiltRange: { min: number; max: number };
