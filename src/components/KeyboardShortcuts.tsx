@@ -3,7 +3,7 @@ import { useLightingStore } from '../stores/lightingStore';
 
 export const KeyboardShortcuts: React.FC = () => {
   const { 
-    selectFixtureById, 
+    selectFixture,
     selectAllFixtures, 
     clearSelection,
     updateDimmer,
@@ -25,15 +25,12 @@ export const KeyboardShortcuts: React.FC = () => {
       // Number keys 1-6 for fixture selection
       if (['1', '2', '3', '4', '5', '6'].includes(key)) {
         const fixtureId = parseInt(key);
-        if (event.shiftKey) {
-          // Add to selection
-          const isSelected = selectedFixtures.includes(fixtureId);
-          if (!isSelected) {
-            selectFixtureById(fixtureId);
-          }
+        if (event.shiftKey || event.ctrlKey) {
+          // Multi-selection mode
+          selectFixture(fixtureId, true);
         } else {
           // Single selection
-          selectFixtureById(fixtureId);
+          selectFixture(fixtureId, false);
         }
         event.preventDefault();
         return;
@@ -78,7 +75,7 @@ export const KeyboardShortcuts: React.FC = () => {
 
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [selectedFixtures, selectFixtureById, selectAllFixtures, clearSelection, updateDimmer]);
+  }, [selectedFixtures, selectFixture, selectAllFixtures, clearSelection, updateDimmer]);
 
   return null; // This component only handles keyboard events
 };
