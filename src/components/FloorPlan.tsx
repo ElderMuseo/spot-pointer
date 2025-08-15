@@ -1,10 +1,11 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useLightingStore } from '../stores/lightingStore';
 import { pixelToReal, realToPixel, calculateLightCone } from '../utils/geometry';
 
 export const FloorPlan: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 600, height: 600 });
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   
   const {
     fixtures,
@@ -47,6 +48,24 @@ export const FloorPlan: React.FC = () => {
     event.stopPropagation();
     selectFixture(fixtureId, event.shiftKey);
   };
+
+  // Update canvas size based on container
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      const container = canvasRef.current?.parentElement;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setCanvasSize({
+          width: Math.max(800, rect.width - 32),
+          height: Math.max(600, rect.height - 32)
+        });
+      }
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    return () => window.removeEventListener('resize', updateCanvasSize);
+  }, []);
 
   // Draw the floor plan
   useEffect(() => {
@@ -97,21 +116,28 @@ export const FloorPlan: React.FC = () => {
         ctx.stroke();
       }
 
-      // Draw light cones for selected fixtures
+      // Draw individual light cones for each selected fixture
       selectedFixtures.forEach(fixtureId => {
         const fixture = fixtures.find(f => f.id === fixtureId);
-        if (!fixture || !targetPoint) return;
+        if (!fixture) return;
 
-        const cone = calculateLightCone(fixture, targetPoint.x, targetPoint.y, fixture.zoom);
+        // Calculate target point for this fixture (use global target or fixture's current position)
+        const targetX = targetPoint?.x ?? fixture.x;
+        const targetY = targetPoint?.y ?? fixture.y + 2; // Default aim 2m forward
+
+        const cone = calculateLightCone(fixture, targetX, targetY, fixture.zoom);
         const centerPixel = realToPixel(cone.centerX, cone.centerY, {
           width: floorPlan.width,
           height: floorPlan.height,
           pixelsPerMeter
         });
 
+        // Use different colors for different fixtures
+        const hue = 45 + (fixtureId - 1) * 60; // Different hues for each fixture
+        
         // Draw cone
-        ctx.fillStyle = 'hsl(45, 95%, 60%, 0.2)';
-        ctx.strokeStyle = 'hsl(45, 95%, 60%)';
+        ctx.fillStyle = `hsl(${hue}, 95%, 60%, 0.15)`;
+        ctx.strokeStyle = `hsl(${hue}, 95%, 60%, 0.8)`;
         ctx.lineWidth = 1;
         
         ctx.beginPath();
@@ -134,7 +160,7 @@ export const FloorPlan: React.FC = () => {
           pixelsPerMeter
         });
 
-        ctx.strokeStyle = 'hsl(45, 95%, 60%, 0.6)';
+        ctx.strokeStyle = `hsl(${hue}, 95%, 60%, 0.6)`;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(fixturePixel.x, fixturePixel.y);
@@ -151,7 +177,7 @@ export const FloorPlan: React.FC = () => {
         });
 
         const isSelected = fixture.isSelected;
-        const radius = 16;
+        const radius = 20;
 
         // Fixture circle
         ctx.fillStyle = isSelected 
@@ -167,7 +193,7 @@ export const FloorPlan: React.FC = () => {
 
         // Fixture number
         ctx.fillStyle = isSelected ? 'hsl(220, 15%, 8%)' : 'hsl(45, 20%, 95%)';
-        ctx.font = 'bold 12px sans-serif';
+        ctx.font = 'bold 14px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(fixture.id.toString(), pixel.x, pixel.y);
@@ -198,7 +224,7 @@ export const FloorPlan: React.FC = () => {
         ctx.lineWidth = 2;
 
         ctx.beginPath();
-        ctx.arc(pixel.x, pixel.y, 6, 0, 2 * Math.PI);
+        ctx.arc(pixel.x, pixel.y, 8, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
@@ -206,10 +232,10 @@ export const FloorPlan: React.FC = () => {
         ctx.strokeStyle = 'hsl(45, 20%, 95%)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(pixel.x - 12, pixel.y);
-        ctx.lineTo(pixel.x + 12, pixel.y);
-        ctx.moveTo(pixel.x, pixel.y - 12);
-        ctx.lineTo(pixel.x, pixel.y + 12);
+        ctx.moveTo(pixel.x - 15, pixel.y);
+        ctx.lineTo(pixel.x + 15, pixel.y);
+        ctx.moveTo(pixel.x, pixel.y - 15);
+        ctx.lineTo(pixel.x, pixel.y + 15);
         ctx.stroke();
       }
     }
@@ -240,10 +266,10 @@ export const FloorPlan: React.FC = () => {
             key={fixture.id}
             className="absolute cursor-pointer"
             style={{
-              left: pixel.x - 16,
-              top: pixel.y - 16,
-              width: 32,
-              height: 32,
+              left: pixel.x - 20,
+              top: pixel.y - 20,
+              width: 40,
+              height: 40,
             }}
             onClick={(e) => handleFixtureClick(fixture.id, e)}
           />
@@ -251,10 +277,15 @@ export const FloorPlan: React.FC = () => {
       })}
       
       {/* Grid coordinates overlay */}
-      <div className="absolute top-2 left-2 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
-        {floorPlan.width}m × {floorPlan.height}m
+      <div className="absolute top-4 left-4 text-sm text-muted-foreground bg-background/80 px-3 py-2 rounded">
+        <div className="font-medium">{floorPlan.width}m × {floorPlan.height}m</div>
         {targetPoint && (
-          <div>Target: {targetPoint.x.toFixed(1)}m, {targetPoint.y.toFixed(1)}m</div>
+          <div className="text-xs">Target: {targetPoint.x.toFixed(1)}m, {targetPoint.y.toFixed(1)}m</div>
+        )}
+        {selectedFixtures.length > 0 && (
+          <div className="text-xs text-primary">
+            Selected: {selectedFixtures.join(', ')}
+          </div>
         )}
       </div>
     </div>

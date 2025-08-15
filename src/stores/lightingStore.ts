@@ -58,25 +58,38 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
 
   selectFixture: (id, multi = false) => set(state => {
     if (multi) {
-      const isSelected = state.selectedFixtures.includes(id);
-      return {
-        selectedFixtures: isSelected 
-          ? state.selectedFixtures.filter(fId => fId !== id)
-          : [...state.selectedFixtures, id],
-        fixtures: state.fixtures.map(f => ({
-          ...f,
-          isSelected: f.id === id ? !f.isSelected : f.isSelected
-        }))
-      };
-    } else {
-      // Single selection - if clicking same fixture, toggle it. Otherwise select only that one.
-      const isCurrentlySelected = state.selectedFixtures.includes(id) && state.selectedFixtures.length === 1;
+      // Multi-selection mode - toggle the fixture
+      const isCurrentlySelected = state.selectedFixtures.includes(id);
       if (isCurrentlySelected) {
+        // Remove from selection
+        return {
+          selectedFixtures: state.selectedFixtures.filter(fId => fId !== id),
+          fixtures: state.fixtures.map(f => ({
+            ...f,
+            isSelected: f.id === id ? false : f.isSelected
+          }))
+        };
+      } else {
+        // Add to selection
+        return {
+          selectedFixtures: [...state.selectedFixtures, id],
+          fixtures: state.fixtures.map(f => ({
+            ...f,
+            isSelected: f.id === id ? true : f.isSelected
+          }))
+        };
+      }
+    } else {
+      // Single selection mode
+      const isCurrentlyOnlySelected = state.selectedFixtures.includes(id) && state.selectedFixtures.length === 1;
+      if (isCurrentlyOnlySelected) {
+        // If this fixture is the only one selected, deselect it
         return {
           selectedFixtures: [],
           fixtures: state.fixtures.map(f => ({ ...f, isSelected: false }))
         };
       } else {
+        // Select only this fixture
         return {
           selectedFixtures: [id],
           fixtures: state.fixtures.map(f => ({ ...f, isSelected: f.id === id }))

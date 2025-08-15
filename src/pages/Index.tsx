@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { FloorPlan } from '../components/FloorPlan';
 import { ControlPanel } from '../components/ControlPanel';
@@ -5,7 +6,6 @@ import { PresetManager } from '../components/PresetManager';
 import { FixtureList } from '../components/FixtureList';
 import { KeyboardShortcuts } from '../components/KeyboardShortcuts';
 import { useLightingStore } from '../stores/lightingStore';
-import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Lightbulb, Target, Zap, Keyboard } from 'lucide-react';
 
@@ -26,11 +26,11 @@ const Index = () => {
   const selectedCount = selectedFixtures.length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <KeyboardShortcuts />
       
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur">
+      <header className="border-b border-border bg-card/50 backdrop-blur flex-shrink-0">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -76,33 +76,38 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Layout */}
-      <div className="container mx-auto px-4 py-4 h-[calc(100vh-73px)]">
-        <div className="grid grid-cols-1 xl:grid-cols-5 lg:grid-cols-4 gap-4 h-full">
-          {/* Floor Plan - Main Area */}
-          <div className="xl:col-span-2 lg:col-span-2 order-1">
-            <FloorPlan />
-          </div>
-          
-          {/* Fixture List - Individual Controls */}
-          <div className="order-2 xl:order-2 lg:order-4">
-            <FixtureList />
-          </div>
-          
-          {/* Control Panel - Group Controls */}
-          <div className="order-3 xl:order-3 lg:order-2">
-            <ControlPanel />
-          </div>
-          
-          {/* Preset Manager */}
-          <div className="order-4 xl:order-4 lg:order-3">
-            <PresetManager />
+      {/* Main Content - Map takes full height */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Floor Plan - Takes most of the screen */}
+        <div className="flex-1 p-4 min-h-0">
+          <FloorPlan />
+        </div>
+        
+        {/* Control Panels - Fixed height at bottom */}
+        <div className="flex-shrink-0 border-t border-border bg-card/30 backdrop-blur">
+          <div className="container mx-auto px-4 py-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Fixture List - Individual Controls */}
+              <div className="order-1">
+                <FixtureList />
+              </div>
+              
+              {/* Control Panel - Group Controls */}
+              <div className="order-2">
+                <ControlPanel />
+              </div>
+              
+              {/* Preset Manager */}
+              <div className="order-3">
+                <PresetManager />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Enhanced Quick Help Overlay */}
-      <div className="fixed bottom-4 left-4 bg-card/90 backdrop-blur border border-border rounded-lg p-3 text-xs max-w-xs">
+      <div className="fixed bottom-4 right-4 bg-card/90 backdrop-blur border border-border rounded-lg p-3 text-xs max-w-xs">
         <div className="font-medium text-foreground mb-2 flex items-center gap-1">
           <Keyboard className="w-3 h-3" />
           Quick Controls
