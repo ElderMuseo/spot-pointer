@@ -20,6 +20,7 @@ interface LightingStore extends LightingState {
   deletePreset: (presetId: string) => void;
   updateTelnetConfig: (ip: string, port: number) => void;
   setFloorPlan: (image: string, width: number, height: number) => void;
+  updateFixtureHeight: (height: number) => void;
   // Telnet client
   telnetClient: TelnetClient | null;
   initializeTelnet: () => void;
@@ -225,6 +226,10 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
       height,
       pixelsPerMeter: 500 / Math.max(width, height) // Approximate scaling
     }
+  })),
+
+  updateFixtureHeight: (height) => set(state => ({
+    fixtures: state.fixtures.map(f => ({ ...f, z: height }))
   })),
 
   initializeTelnet: () => {

@@ -15,11 +15,13 @@ export const ControlPanel: React.FC = () => {
     fixtures,
     selectedFixtures,
     telnetConfig,
+    floorPlan,
     updateDimmer,
     updateColor,
     updateGobo,
     updateTelnetConfig,
-    initializeTelnet
+    initializeTelnet,
+    updateFixtureHeight
   } = useLightingStore();
 
   const [tempTelnetConfig, setTempTelnetConfig] = useState({
@@ -312,6 +314,28 @@ export const ControlPanel: React.FC = () => {
               >
                 {telnetConfig.connected ? "Reconnect" : "Connect"} to Console
               </Button>
+            </div>
+
+            {/* Fixture Height */}
+            <div className="space-y-2">
+              <Label htmlFor="fixture-height">Fixture Height (meters)</Label>
+              <div className="flex items-center space-x-3">
+                <Input
+                  id="fixture-height"
+                  type="number"
+                  value={fixtures[0]?.z || 3}
+                  onChange={(e) => {
+                    const height = parseFloat(e.target.value) || 3;
+                    updateFixtureHeight(height);
+                  }}
+                  placeholder="3.0"
+                  step="0.1"
+                  min="0.1"
+                  max="20"
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground">m</span>
+              </div>
             </div>
 
             {/* Floor Plan Setup */}
