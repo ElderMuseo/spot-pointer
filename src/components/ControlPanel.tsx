@@ -21,7 +21,9 @@ export const ControlPanel: React.FC = () => {
     updateGobo,
     updateTelnetConfig,
     initializeTelnet,
-    updateFixtureHeight
+    updateFixtureHeight,
+    updateFixturePosition,
+    adjustFixtureSpacing
   } = useLightingStore();
 
   const [tempTelnetConfig, setTempTelnetConfig] = useState({
@@ -335,6 +337,62 @@ export const ControlPanel: React.FC = () => {
                   className="flex-1"
                 />
                 <span className="text-sm text-muted-foreground">m</span>
+              </div>
+            </div>
+
+            {/* Fixture Spacing */}
+            <div className="space-y-2">
+              <Label htmlFor="fixture-spacing">Fixture Spacing (meters)</Label>
+              <div className="flex items-center space-x-3">
+                <Input
+                  id="fixture-spacing"
+                  type="number"
+                  defaultValue="2"
+                  onChange={(e) => {
+                    const spacing = parseFloat(e.target.value) || 2;
+                    adjustFixtureSpacing(spacing);
+                  }}
+                  placeholder="2.0"
+                  step="0.1"
+                  min="0.5"
+                  max="10"
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground">m</span>
+              </div>
+            </div>
+
+            {/* Individual Fixture Positions */}
+            <div className="space-y-2">
+              <Label>Fixture Positions</Label>
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                {fixtures.map(fixture => (
+                  <div key={fixture.id} className="flex items-center space-x-2 text-xs">
+                    <span className="w-4 text-muted-foreground">#{fixture.id}</span>
+                    <Input
+                      type="number"
+                      value={fixture.x}
+                      onChange={(e) => {
+                        const x = parseFloat(e.target.value) || 0;
+                        updateFixturePosition(fixture.id, x, fixture.y);
+                      }}
+                      step="0.1"
+                      className="h-6 text-xs flex-1"
+                      placeholder="X"
+                    />
+                    <Input
+                      type="number"
+                      value={fixture.y}
+                      onChange={(e) => {
+                        const y = parseFloat(e.target.value) || 0;
+                        updateFixturePosition(fixture.id, fixture.x, y);
+                      }}
+                      step="0.1"
+                      className="h-6 text-xs flex-1"
+                      placeholder="Y"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 

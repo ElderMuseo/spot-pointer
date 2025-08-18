@@ -21,6 +21,8 @@ interface LightingStore extends LightingState {
   updateTelnetConfig: (ip: string, port: number) => void;
   setFloorPlan: (image: string, width: number, height: number) => void;
   updateFixtureHeight: (height: number) => void;
+  updateFixturePosition: (id: number, x: number, y: number) => void;
+  adjustFixtureSpacing: (spacing: number) => void;
   // Telnet client
   telnetClient: TelnetClient | null;
   initializeTelnet: () => void;
@@ -231,6 +233,25 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   updateFixtureHeight: (height) => set(state => ({
     fixtures: state.fixtures.map(f => ({ ...f, z: height }))
   })),
+
+  updateFixturePosition: (id, x, y) => set(state => ({
+    fixtures: state.fixtures.map(f => 
+      f.id === id ? { ...f, x, y } : f
+    )
+  })),
+
+  adjustFixtureSpacing: (spacing) => set(state => {
+    const fixtures = [...state.fixtures].sort((a, b) => a.x - b.x);
+    const baseY = fixtures[0]?.y || 5;
+    const startX = 1;
+    
+    return {
+      fixtures: state.fixtures.map(f => {
+        const index = fixtures.findIndex(fix => fix.id === f.id);
+        return { ...f, x: startX + (index * spacing), y: baseY };
+      })
+    };
+  }),
 
   initializeTelnet: () => {
     const state = get();
