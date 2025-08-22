@@ -132,13 +132,15 @@ export const FloorPlan: React.FC = () => {
         // Use fixture's actual RGB color
         const { r, g, b } = fixture.color;
         
-        // Selected fixtures have brighter, more opaque cones
+        // Calculate opacity based on dimmer level (0-100%) and selection state
+        const dimmerOpacity = fixture.dimmer / 100; // Convert dimmer to 0-1 range
         const isSelected = fixture.isSelected;
-        const opacity = isSelected ? 0.25 : 0.1;
-        const strokeOpacity = isSelected ? 0.8 : 0.4;
+        const baseOpacity = isSelected ? 0.4 : 0.25; // Higher base opacity for visibility
+        const opacity = baseOpacity * dimmerOpacity; // Multiply by dimmer level
+        const strokeOpacity = isSelected ? 0.8 * dimmerOpacity : 0.6 * dimmerOpacity;
         const lineWidth = isSelected ? 2 : 1;
         
-        // Draw cone using fixture's RGB color
+        // Draw cone using fixture's RGB color with dimmer-based opacity
         ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${strokeOpacity})`;
         ctx.lineWidth = lineWidth;
@@ -164,7 +166,8 @@ export const FloorPlan: React.FC = () => {
             pixelsPerMeter
           });
 
-          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
+          const beamOpacity = 0.8 * dimmerOpacity; // Use dimmer for beam line opacity too
+          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${beamOpacity})`;
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.moveTo(fixturePixel.x, fixturePixel.y);
