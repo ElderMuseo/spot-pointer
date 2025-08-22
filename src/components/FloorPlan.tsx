@@ -129,18 +129,18 @@ export const FloorPlan: React.FC = () => {
           pixelsPerMeter
         });
 
-        // Use different colors for different fixtures
-        const hue = 45 + (fixture.id - 1) * 60; // Different hues for each fixture
+        // Use fixture's actual RGB color
+        const { r, g, b } = fixture.color;
         
         // Selected fixtures have brighter, more opaque cones
         const isSelected = fixture.isSelected;
         const opacity = isSelected ? 0.25 : 0.1;
-        const strokeOpacity = isSelected ? 1 : 0.4;
+        const strokeOpacity = isSelected ? 0.8 : 0.4;
         const lineWidth = isSelected ? 2 : 1;
         
-        // Draw cone
-        ctx.fillStyle = `hsl(${hue}, 95%, 60%, ${opacity})`;
-        ctx.strokeStyle = `hsl(${hue}, 95%, 60%, ${strokeOpacity})`;
+        // Draw cone using fixture's RGB color
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${strokeOpacity})`;
         ctx.lineWidth = lineWidth;
         
         ctx.beginPath();
@@ -164,7 +164,7 @@ export const FloorPlan: React.FC = () => {
             pixelsPerMeter
           });
 
-          ctx.strokeStyle = `hsl(${hue}, 95%, 60%, 0.6)`;
+          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.moveTo(fixturePixel.x, fixturePixel.y);
