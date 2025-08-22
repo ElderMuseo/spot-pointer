@@ -15,6 +15,7 @@ interface LightingStore extends LightingState {
   updateDimmer: (fixtureIds: number[], dimmer: number) => void;
   updateColor: (fixtureIds: number[], r: number, g: number, b: number) => void;
   updateGobo: (fixtureIds: number[], gobo: number) => void;
+  updateIris: (fixtureIds: number[], iris: number) => void;
   savePreset: (name: string, description: string) => void;
   loadPreset: (presetId: string) => void;
   deletePreset: (presetId: string) => void;
@@ -30,13 +31,13 @@ interface LightingStore extends LightingState {
 
 const defaultFixtures: Fixture[] = [
   // 1x6 configuration with bigger space in the middle
-  { id: 1, x: 1, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 1, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 2, x: 3, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 3, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 3, x: 4.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 4.5, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 1, x: 1, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 1, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 2, x: 3, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 3, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 3, x: 4.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 4.5, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
   // Bigger gap in the middle
-  { id: 4, x: 6.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 6.5, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 5, x: 8, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 8, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 6, x: 10, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, isSelected: false, targetX: 10, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 4, x: 6.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 6.5, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 5, x: 8, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 8, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
+  { id: 6, x: 10, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 10, targetY: 3, panRange: { min: 0, max: 360 }, tiltRange: { min: -90, max: 90 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
 ];
 
 export const useLightingStore = create<LightingStore>((set, get) => ({
@@ -183,6 +184,20 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     set(state => ({
       fixtures: state.fixtures.map(f => 
         fixtureIds.includes(f.id) ? { ...f, gobo } : f
+      )
+    }));
+  },
+
+  updateIris: (fixtureIds, iris) => {
+    const state = get();
+    // Note: Iris telnet command could be added to TelnetClient later
+    // if (state.telnetClient) {
+    //   state.telnetClient.sendIris(fixtureIds, iris);
+    // }
+    
+    set(state => ({
+      fixtures: state.fixtures.map(f => 
+        fixtureIds.includes(f.id) ? { ...f, iris } : f
       )
     }));
   },

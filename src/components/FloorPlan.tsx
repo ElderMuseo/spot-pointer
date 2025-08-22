@@ -118,8 +118,11 @@ export const FloorPlan: React.FC = () => {
 
       // Draw individual light cones for ALL fixtures
       fixtures.forEach(fixture => {
-        // Use fixture's individual target point
-        const cone = calculateLightCone(fixture, fixture.targetX, fixture.targetY, fixture.zoom);
+        // Use fixture's individual target point and iris for cone size
+        const baseBeamAngle = fixture.zoom;
+        const irisMultiplier = fixture.iris / 100; // Convert iris percentage to multiplier
+        const adjustedBeamAngle = baseBeamAngle * irisMultiplier;
+        const cone = calculateLightCone(fixture, fixture.targetX, fixture.targetY, adjustedBeamAngle);
         const centerPixel = realToPixel(cone.centerX, cone.centerY, {
           width: floorPlan.width,
           height: floorPlan.height,

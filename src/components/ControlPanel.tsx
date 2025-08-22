@@ -19,6 +19,7 @@ export const ControlPanel: React.FC = () => {
     updateDimmer,
     updateColor,
     updateGobo,
+    updateIris,
     updateTelnetConfig,
     initializeTelnet,
     updateFixtureHeight,
@@ -38,6 +39,7 @@ export const ControlPanel: React.FC = () => {
   const commonDimmer = hasSelection ? selectedFixtureData[0]?.dimmer : 0;
   const commonColor = hasSelection ? selectedFixtureData[0]?.color : { r: 255, g: 255, b: 255 };
   const commonGobo = hasSelection ? selectedFixtureData[0]?.gobo : 0;
+  const commonIris = hasSelection ? selectedFixtureData[0]?.iris : 50;
 
   const handleDimmerChange = (value: number[]) => {
     if (hasSelection) {
@@ -55,6 +57,12 @@ export const ControlPanel: React.FC = () => {
   const handleGoboChange = (goboIndex: number) => {
     if (hasSelection) {
       updateGobo(selectedFixtures, goboIndex);
+    }
+  };
+
+  const handleIrisChange = (value: number[]) => {
+    if (hasSelection) {
+      updateIris(selectedFixtures, value[0]);
     }
   };
 
@@ -163,6 +171,24 @@ export const ControlPanel: React.FC = () => {
                     <span className="text-xs">{gobo.name}</span>
                   </Button>
                 ))}
+              </div>
+            </div>
+
+            {/* Iris Control */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Iris Opening</Label>
+              <div className="flex items-center space-x-3">
+                <Slider
+                  value={[commonIris]}
+                  onValueChange={handleIrisChange}
+                  max={100}
+                  step={1}
+                  className="flex-1"
+                  disabled={!hasSelection}
+                />
+                <span className="text-sm font-mono w-12 text-right">
+                  {commonIris}%
+                </span>
               </div>
             </div>
 
