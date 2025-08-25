@@ -50,11 +50,10 @@ export interface Preset {
   fixtures: Omit<Fixture, 'isSelected'>[];
 }
 
-export interface TelnetConfig {
-  ip: string;
-  port: number;
-  connected: boolean;
-  reconnecting: boolean;
+export interface ApiConfig {
+  baseUrl: string;
+  grandma2Host: string;
+  grandma2Port: number;
 }
 
 export interface LightingState {
@@ -62,6 +61,6 @@ export interface LightingState {
   floorPlan: FloorPlan;
   selectedFixtures: number[];
   presets: Preset[];
-  telnetConfig: TelnetConfig;
+  apiConfig: ApiConfig;
   targetPoint: { x: number; y: number } | null;
 }

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { LightingState, Fixture, Preset } from '../types/lighting';
 import { calculatePanTilt, degreesToPercent } from '../utils/geometry';
-import { TelnetClient } from '../utils/telnet';
+import { GrandMA2ApiClient } from '../utils/grandma2-api';
 
 interface LightingStore extends LightingState {
   // Actions
@@ -19,14 +19,14 @@ interface LightingStore extends LightingState {
   savePreset: (name: string, description: string) => void;
   loadPreset: (presetId: string) => void;
   deletePreset: (presetId: string) => void;
-  updateTelnetConfig: (ip: string, port: number) => void;
+  updateApiConfig: (baseUrl: string, grandma2Host: string, grandma2Port: number) => void;
   setFloorPlan: (image: string, width: number, height: number) => void;
   updateFixtureHeight: (height: number) => void;
   updateFixturePosition: (id: number, x: number, y: number) => void;
   adjustFixtureSpacing: (spacing: number) => void;
-  // Telnet client
-  telnetClient: TelnetClient | null;
-  initializeTelnet: () => void;
+  // API client
+  apiClient: GrandMA2ApiClient | null;
+  initializeApi: (baseUrl: string, grandma2Host: string, grandma2Port: number) => Promise<boolean>;
 }
 
 const defaultFixtures: Fixture[] = [
@@ -51,14 +51,13 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   },
   selectedFixtures: [],
   presets: [],
-  telnetConfig: {
-    ip: '192.168.1.100',
-    port: 23,
-    connected: false,
-    reconnecting: false
+  apiConfig: {
+    baseUrl: 'http://localhost:8000',
+    grandma2Host: '192.168.1.100',
+    grandma2Port: 30000,
   },
   targetPoint: null,
-  telnetClient: null,
+  apiClient: null,
 
   selectFixture: (id, multi = false) => set(state => {
     if (multi) {
@@ -133,11 +132,13 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     // Calculate pan/tilt with floor level target (z=0) and fixture height
     const { pan, tilt } = calculatePanTilt(fixture, x, y, 0);
     
-    // Convert to percentages for telnet
-    if (state.telnetClient) {
-      const panPercent = degreesToPercent(pan, fixture.panRange.min, fixture.panRange.max);
-      const tiltPercent = degreesToPercent(tilt, fixture.tiltRange.min, fixture.tiltRange.max);
-      state.telnetClient.sendPanTilt(fixtureId, panPercent, tiltPercent);
+    // Convert to percentages for API
+    const panPercent = degreesToPercent(pan, fixture.panRange.min, fixture.panRange.max);
+    const tiltPercent = degreesToPercent(tilt, fixture.tiltRange.min, fixture.tiltRange.max);
+    
+    // Send pan/tilt to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendPanTilt(fixtureId, panPercent, tiltPercent);
     }
     
     // Update local state - only update this fixture's target and position
@@ -150,9 +151,9 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   },
 
   updateDimmer: (fixtureIds, dimmer) => {
-    const state = get();
-    if (state.telnetClient) {
-      state.telnetClient.sendDimmer(fixtureIds, dimmer);
+    // Send dimmer command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendDimmer(fixtureIds, dimmer);
     }
     
     set(state => ({
@@ -163,9 +164,9 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   },
 
   updateColor: (fixtureIds, r, g, b) => {
-    const state = get();
-    if (state.telnetClient) {
-      state.telnetClient.sendColor(fixtureIds, r, g, b);
+    // Send color command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendColor(fixtureIds, r, g, b);
     }
     
     set(state => ({
@@ -176,9 +177,9 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   },
 
   updateGobo: (fixtureIds, gobo) => {
-    const state = get();
-    if (state.telnetClient) {
-      state.telnetClient.sendGobo(fixtureIds, gobo);
+    // Send gobo command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendGobo(fixtureIds, gobo);
     }
     
     set(state => ({
@@ -189,11 +190,10 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   },
 
   updateIris: (fixtureIds, iris) => {
-    const state = get();
-    // Note: Iris telnet command could be added to TelnetClient later
-    // if (state.telnetClient) {
-    //   state.telnetClient.sendIris(fixtureIds, iris);
-    // }
+    // Send iris command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendIris(fixtureIds, iris);
+    }
     
     set(state => ({
       fixtures: state.fixtures.map(f => 
@@ -231,8 +231,8 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     presets: state.presets.filter(p => p.id !== presetId)
   })),
 
-  updateTelnetConfig: (ip, port) => set(state => ({
-    telnetConfig: { ...state.telnetConfig, ip, port }
+  updateApiConfig: (baseUrl, grandma2Host, grandma2Port) => set(state => ({
+    apiConfig: { baseUrl, grandma2Host, grandma2Port }
   })),
 
   setFloorPlan: (image, width, height) => set(state => ({
@@ -268,22 +268,46 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     };
   }),
 
-  initializeTelnet: () => {
-    const state = get();
-    if (state.telnetClient) {
-      state.telnetClient.disconnect();
+  initializeApi: async (baseUrl: string, grandma2Host: string, grandma2Port: number) => {
+    const { apiClient } = get();
+    
+    // Disconnect existing client
+    if (apiClient) {
+      apiClient.disconnect();
     }
-    
-    const client = new TelnetClient(
-      state.telnetConfig.ip,
-      state.telnetConfig.port,
-      (connected) => set(state => ({
-        telnetConfig: { ...state.telnetConfig, connected, reconnecting: false }
-      })),
-      (message) => console.log('[Telnet]', message)
+
+    // Create new client
+    const newClient = new GrandMA2ApiClient(
+      baseUrl,
+      (connected) => {
+        console.log(`GrandMA2 API connection: ${connected ? 'connected' : 'disconnected'}`);
+      },
+      (message) => {
+        console.log(`GrandMA2 API log: ${message}`);
+      }
     );
+
+    // Update GrandMA2 configuration first
+    try {
+      await newClient.updateConfig({
+        host: grandma2Host,
+        port: grandma2Port
+      });
+    } catch (error) {
+      console.error('Failed to update GrandMA2 config:', error);
+    }
+
+    // Try to connect
+    const connected = await newClient.connect();
     
-    set({ telnetClient: client });
-    client.connect();
-  }
+    if (connected) {
+      set((state) => ({
+        ...state,
+        apiClient: newClient,
+        apiConfig: { baseUrl, grandma2Host, grandma2Port }
+      }));
+    }
+
+    return connected;
+  },
 }));

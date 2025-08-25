@@ -13,14 +13,15 @@ const Index = () => {
   const { 
     fixtures, 
     selectedFixtures, 
-    telnetConfig,
-    initializeTelnet 
+    apiConfig,
+    apiClient,
+    initializeApi 
   } = useLightingStore();
 
-  // Initialize telnet connection on mount
+  // Initialize API connection on mount
   useEffect(() => {
-    initializeTelnet();
-  }, [initializeTelnet]);
+    initializeApi(apiConfig.baseUrl, apiConfig.grandma2Host, apiConfig.grandma2Port);
+  }, [initializeApi, apiConfig.baseUrl, apiConfig.grandma2Host, apiConfig.grandma2Port]);
 
   const activeFixtures = fixtures.filter(f => f.dimmer > 0).length;
   const selectedCount = selectedFixtures.length;
@@ -65,11 +66,11 @@ const Index = () => {
                 <span className="text-muted-foreground">1-6 keys</span>
               </div>
               <div className={`px-2 py-1 rounded text-xs ${
-                telnetConfig.connected 
+                apiClient?.isConnected() 
                   ? 'bg-primary/20 text-primary' 
                   : 'bg-destructive/20 text-destructive'
               }`}>
-                {telnetConfig.connected ? 'Connected' : 'Disconnected'}
+                {apiClient?.isConnected() ? 'Connected' : 'Disconnected'}
               </div>
             </div>
           </div>

@@ -14,22 +14,24 @@ export const ControlPanel: React.FC = () => {
   const {
     fixtures,
     selectedFixtures,
-    telnetConfig,
+    apiConfig,
+    apiClient,
     floorPlan,
     updateDimmer,
     updateColor,
     updateGobo,
     updateIris,
-    updateTelnetConfig,
-    initializeTelnet,
+    updateApiConfig,
+    initializeApi,
     updateFixtureHeight,
     updateFixturePosition,
     adjustFixtureSpacing
   } = useLightingStore();
 
-  const [tempTelnetConfig, setTempTelnetConfig] = useState({
-    ip: telnetConfig.ip,
-    port: telnetConfig.port
+  const [tempApiConfig, setTempApiConfig] = useState({
+    baseUrl: apiConfig.baseUrl,
+    grandma2Host: apiConfig.grandma2Host,
+    grandma2Port: apiConfig.grandma2Port
   });
 
   const selectedFixtureData = fixtures.filter(f => selectedFixtures.includes(f.id));
@@ -66,9 +68,9 @@ export const ControlPanel: React.FC = () => {
     }
   };
 
-  const connectTelnet = () => {
-    updateTelnetConfig(tempTelnetConfig.ip, tempTelnetConfig.port);
-    initializeTelnet();
+  const connectToApi = () => {
+    updateApiConfig(tempApiConfig.baseUrl, tempApiConfig.grandma2Host, tempApiConfig.grandma2Port);
+    initializeApi(tempApiConfig.baseUrl, tempApiConfig.grandma2Host, tempApiConfig.grandma2Port);
   };
 
   const gobos = [
@@ -90,7 +92,7 @@ export const ControlPanel: React.FC = () => {
         
         {/* Connection Status */}
         <div className="flex items-center gap-2 text-sm">
-          {telnetConfig.connected ? (
+          {apiClient?.isConnected() ? (
             <div className="flex items-center gap-1 text-primary">
               <Wifi className="w-4 h-4" />
               <span>Connected</span>
@@ -102,7 +104,7 @@ export const ControlPanel: React.FC = () => {
             </div>
           )}
           <span className="text-muted-foreground">•</span>
-          <span className="text-muted-foreground">{telnetConfig.ip}:{telnetConfig.port}</span>
+          <span className="text-muted-foreground">{apiConfig.grandma2Host}:{apiConfig.grandma2Port}</span>
         </div>
         
         {/* Selected Fixtures */}
@@ -312,35 +314,45 @@ export const ControlPanel: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="setup" className="space-y-4 mt-4">
-            {/* Telnet Configuration */}
+            {/* API Configuration */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="telnet-ip">Console IP Address</Label>
+                <Label htmlFor="api-url">API Base URL</Label>
                 <Input
-                  id="telnet-ip"
-                  value={tempTelnetConfig.ip}
-                  onChange={(e) => setTempTelnetConfig(prev => ({ ...prev, ip: e.target.value }))}
+                  id="api-url"
+                  value={tempApiConfig.baseUrl}
+                  onChange={(e) => setTempApiConfig(prev => ({ ...prev, baseUrl: e.target.value }))}
+                  placeholder="http://localhost:8000"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grandma2-ip">GrandMA2 IP Address</Label>
+                <Input
+                  id="grandma2-ip"
+                  value={tempApiConfig.grandma2Host}
+                  onChange={(e) => setTempApiConfig(prev => ({ ...prev, grandma2Host: e.target.value }))}
                   placeholder="192.168.1.100"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="telnet-port">Port</Label>
+                <Label htmlFor="grandma2-port">GrandMA2 Port</Label>
                 <Input
-                  id="telnet-port"
+                  id="grandma2-port"
                   type="number"
-                  value={tempTelnetConfig.port}
-                  onChange={(e) => setTempTelnetConfig(prev => ({ ...prev, port: parseInt(e.target.value) || 23 }))}
-                  placeholder="23"
+                  value={tempApiConfig.grandma2Port}
+                  onChange={(e) => setTempApiConfig(prev => ({ ...prev, grandma2Port: parseInt(e.target.value) || 30000 }))}
+                  placeholder="30000"
                 />
               </div>
 
               <Button 
-                onClick={connectTelnet}
+                onClick={connectToApi}
                 className="w-full"
-                variant={telnetConfig.connected ? "secondary" : "default"}
+                variant={apiClient?.isConnected() ? "secondary" : "default"}
               >
-                {telnetConfig.connected ? "Reconnect" : "Connect"} to Console
+                {apiClient?.isConnected() ? "Reconnect" : "Connect"} to GrandMA2
               </Button>
             </div>
 
