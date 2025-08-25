@@ -21,8 +21,9 @@ export function calculatePanTilt(
   pan += fixture.panOffset;
   if (fixture.panInverted) pan = -pan;
   
-  // Normalize to 0-360 degrees
-  pan = ((pan % 360) + 360) % 360;
+  // Normalize to -270 to 270 degrees range
+  while (pan > 270) pan -= 360;
+  while (pan < -270) pan += 360;
 
   // Calculate tilt (vertical angle)
   const horizontalDistance = Math.sqrt(dx * dx + dy * dy);
