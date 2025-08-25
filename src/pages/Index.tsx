@@ -66,11 +66,11 @@ const Index = () => {
                 <span className="text-muted-foreground">1-6 keys</span>
               </div>
               <div className={`px-2 py-1 rounded text-xs ${
-                apiClient?.isConnected() 
+                (apiClient && apiClient.isConnected()) 
                   ? 'bg-primary/20 text-primary' 
                   : 'bg-destructive/20 text-destructive'
               }`}>
-                {apiClient?.isConnected() ? 'Connected' : 'Disconnected'}
+                {(apiClient && apiClient.isConnected()) ? 'Connected' : 'Disconnected'}
               </div>
             </div>
           </div>

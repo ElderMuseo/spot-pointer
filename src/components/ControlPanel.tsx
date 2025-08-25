@@ -92,7 +92,7 @@ export const ControlPanel: React.FC = () => {
         
         {/* Connection Status */}
         <div className="flex items-center gap-2 text-sm">
-          {apiClient?.isConnected() ? (
+          {(apiClient && apiClient.isConnected()) ? (
             <div className="flex items-center gap-1 text-primary">
               <Wifi className="w-4 h-4" />
               <span>Connected</span>
@@ -350,9 +350,9 @@ export const ControlPanel: React.FC = () => {
               <Button 
                 onClick={connectToApi}
                 className="w-full"
-                variant={apiClient?.isConnected() ? "secondary" : "default"}
+                variant={(apiClient && apiClient.isConnected()) ? "secondary" : "default"}
               >
-                {apiClient?.isConnected() ? "Reconnect" : "Connect"} to GrandMA2
+                {(apiClient && apiClient.isConnected()) ? "Reconnect" : "Connect"} to GrandMA2
               </Button>
             </div>
 
