@@ -100,20 +100,38 @@ export const FloorPlan: React.FC = () => {
       ctx.strokeStyle = 'hsl(220, 10%, 30%)';
       ctx.lineWidth = 0.5;
       
+      // Vertical grid lines (X coordinates)
       for (let i = 0; i <= floorPlan.width; i++) {
         const x = i * pixelsPerMeter;
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvasSize.height);
         ctx.stroke();
+        
+        // X coordinate labels
+        if (i % 5 === 0) {
+          ctx.fillStyle = 'hsl(220, 10%, 60%)';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(i.toString() + 'm', x, canvasSize.height - 5);
+        }
       }
       
+      // Horizontal grid lines (Y coordinates - remember Y increases upward)
       for (let i = 0; i <= floorPlan.height; i++) {
-        const y = i * pixelsPerMeter;
+        const canvasY = canvasSize.height - (i * pixelsPerMeter); // Flip for bottom-left origin
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasSize.width, y);
+        ctx.moveTo(0, canvasY);
+        ctx.lineTo(canvasSize.width, canvasY);
         ctx.stroke();
+        
+        // Y coordinate labels (show real Y values)
+        if (i % 5 === 0) {
+          ctx.fillStyle = 'hsl(220, 10%, 60%)';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(i.toString() + 'm', 5, canvasY - 5);
+        }
       }
 
       // Draw individual light cones for ALL fixtures

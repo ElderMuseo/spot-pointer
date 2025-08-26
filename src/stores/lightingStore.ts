@@ -29,25 +29,58 @@ interface LightingStore extends LightingState {
   initializeApi: (baseUrl: string, grandma2Host: string, grandma2Port: number) => Promise<boolean>;
 }
 
-const defaultFixtures: Fixture[] = [
-  // 1x6 configuration with bigger space in the middle
-  { id: 1, x: 1, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 1, targetY: 3, panRange: { min: -270, max: 270 }, tiltRange: { min: -134, max: 134 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 2, x: 3, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 3, targetY: 3, panRange: { min: -270, max: 270 }, tiltRange: { min: -134, max: 134 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 3, x: 4.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 4.5, targetY: 3, panRange: { min: -270, max: 270 }, tiltRange: { min: -134, max: 134 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  // Bigger gap in the middle
-  { id: 4, x: 6.5, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 6.5, targetY: 3, panRange: { min: -270, max: 270 }, tiltRange: { min: -134, max: 134 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 5, x: 8, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 8, targetY: 3, panRange: { min: -270, max: 270 }, tiltRange: { min: -134, max: 134 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-  { id: 6, x: 10, y: 5, z: 3, pan: 0, tilt: 0, dimmer: 0, color: { r: 255, g: 255, b: 255 }, gobo: 0, zoom: 15, iris: 50, isSelected: false, targetX: 10, targetY: 3, panRange: { min: -270, max: 270 }, tiltRange: { min: -134, max: 134 }, panOffset: 0, tiltOffset: 0, panInverted: false, tiltInverted: false },
-];
+// Room parameters (matching Python code)
+const ROOM_WIDTH_X = 20.67;   // m
+const ROOM_LENGTH_Y = 36.70;  // m
+const LIGHTS_Y = 19.61;       // m (from bottom edge)
+const LIGHTS_Z = 8.45;        // m (height)
+
+// Light X positions with gaps [2.0, 2.0, 3.0, 2.0, 2.0] centered in width
+const GAPS = [2.0, 2.0, 3.0, 2.0, 2.0];
+const computeLightPositionsX = () => {
+  const xCenter = ROOM_WIDTH_X / 2.0;
+  const totalSpan = GAPS.reduce((sum, gap) => sum + gap, 0); // 11m
+  const xLeft = xCenter - totalSpan / 2.0; // starting position
+  const positions = [xLeft];
+  for (const gap of GAPS) {
+    positions.push(positions[positions.length - 1] + gap);
+  }
+  return positions; // 6 positions
+};
+
+const lightXPositions = computeLightPositionsX();
+
+const defaultFixtures: Fixture[] = lightXPositions.map((x, index) => ({
+  id: index + 1,
+  x,
+  y: LIGHTS_Y,
+  z: LIGHTS_Z,
+  pan: 0,
+  tilt: 0,
+  dimmer: 0,
+  color: { r: 255, g: 255, b: 255 },
+  gobo: 0,
+  zoom: 15,
+  iris: 50,
+  isSelected: false,
+  targetX: x,
+  targetY: ROOM_LENGTH_Y / 2, // Default target at room center
+  panRange: { min: -270, max: 270 },
+  tiltRange: { min: -134, max: 134 },
+  panOffset: 0,
+  tiltOffset: 0,
+  panInverted: false,
+  tiltInverted: true // Match Python INVERT_TILT = True
+}));
 
 export const useLightingStore = create<LightingStore>((set, get) => ({
   fixtures: defaultFixtures,
   floorPlan: {
     image: null,
-    width: 12,
-    height: 8,
+    width: ROOM_WIDTH_X,
+    height: ROOM_LENGTH_Y,
     calibrationPoints: [],
-    pixelsPerMeter: 50
+    pixelsPerMeter: 20
   },
   selectedFixtures: [],
   presets: [],
@@ -256,15 +289,21 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
   })),
 
   adjustFixtureSpacing: (spacing) => set(state => {
-    const fixtures = [...state.fixtures].sort((a, b) => a.x - b.x);
-    const baseY = fixtures[0]?.y || 5;
-    const startX = 1;
+    // Recalculate positions based on new spacing but maintain the centered layout
+    const newGaps = Array(5).fill(spacing);
+    const xCenter = ROOM_WIDTH_X / 2.0;
+    const totalSpan = newGaps.reduce((sum, gap) => sum + gap, 0);
+    const xLeft = xCenter - totalSpan / 2.0;
+    const newPositions = [xLeft];
+    for (const gap of newGaps) {
+      newPositions.push(newPositions[newPositions.length - 1] + gap);
+    }
     
     return {
-      fixtures: state.fixtures.map(f => {
-        const index = fixtures.findIndex(fix => fix.id === f.id);
-        return { ...f, x: startX + (index * spacing), y: baseY };
-      })
+      fixtures: state.fixtures.map((f, index) => ({
+        ...f, 
+        x: newPositions[index] || f.x
+      }))
     };
   }),
 

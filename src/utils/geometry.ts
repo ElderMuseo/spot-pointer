@@ -2,6 +2,7 @@ import { Fixture } from '../types/lighting';
 
 /**
  * Calculate pan and tilt angles for a fixture to point at a target
+ * Following the Python code convention exactly
  */
 export function calculatePanTilt(
   fixture: Fixture,
@@ -12,26 +13,43 @@ export function calculatePanTilt(
   // Vector from fixture to target
   const dx = targetX - fixture.x;
   const dy = targetY - fixture.y;
-  const dz = targetZ - fixture.z;
+  const dz = fixture.z - targetZ; // positive if fixture is above target
 
-  // Calculate pan (horizontal angle)
-  let pan = Math.atan2(dy, dx) * (180 / Math.PI);
+  // Calculate pan (azimuth): atan2(dx, dy) - 0° toward +y, positive toward +x
+  let pan = Math.atan2(dx, dy) * (180 / Math.PI); // [-180, 180]
   
-  // Apply pan offset and inversion
-  pan += fixture.panOffset;
+  // Calculate tilt (elevation): 0° horizontal; >0 toward floor; <0 toward ceiling  
+  const h = Math.sqrt(dx * dx + dy * dy);
+  let tilt;
+  if (h === 0) {
+    // Target directly below/above fixture
+    tilt = dz > 0 ? 90.0 : -90.0;
+  } else {
+    tilt = Math.atan2(h, dz) * (180 / Math.PI);
+  }
+
+  // Apply inversions (calibration)
   if (fixture.panInverted) pan = -pan;
-  
-  // Normalize to -270 to 270 degrees range
-  while (pan > 270) pan -= 360;
-  while (pan < -270) pan += 360;
-
-  // Calculate tilt (vertical angle)
-  const horizontalDistance = Math.sqrt(dx * dx + dy * dy);
-  let tilt = Math.atan2(-dz, horizontalDistance) * (180 / Math.PI);
-  
-  // Apply tilt offset and inversion
-  tilt += fixture.tiltOffset;
   if (fixture.tiltInverted) tilt = -tilt;
+  
+  // Apply offsets
+  pan += fixture.panOffset;
+  tilt += fixture.tiltOffset;
+
+  // Wrap pan to [-270, 270] range if needed
+  const panRange = fixture.panRange.max - fixture.panRange.min;
+  if (panRange >= 360.0 - 1e-6) {
+    // Normalize to (-180, 180] and then adjust if range is not symmetric
+    pan = ((pan + 180.0) % 360.0) - 180.0;
+    if (pan < fixture.panRange.min) pan = fixture.panRange.min;
+    else if (pan > fixture.panRange.max) pan = fixture.panRange.max;
+  } else {
+    // Clamp to range
+    pan = Math.max(fixture.panRange.min, Math.min(fixture.panRange.max, pan));
+  }
+  
+  // Clamp tilt to range (tilt doesn't usually wrap 360°)
+  tilt = Math.max(fixture.tiltRange.min, Math.min(fixture.tiltRange.max, tilt));
 
   return { pan, tilt };
 }
@@ -104,28 +122,32 @@ export function calculateLightCone(
 
 /**
  * Convert pixel coordinates to real world coordinates
+ * Bottom-left origin: (0,0) at bottom-left, x goes right, y goes up
  */
 export function pixelToReal(
   pixelX: number,
   pixelY: number,
   floorPlan: { width: number; height: number; pixelsPerMeter: number }
 ): { x: number; y: number } {
+  const canvasHeight = floorPlan.height * floorPlan.pixelsPerMeter;
   return {
     x: pixelX / floorPlan.pixelsPerMeter,
-    y: pixelY / floorPlan.pixelsPerMeter
+    y: (canvasHeight - pixelY) / floorPlan.pixelsPerMeter // Flip Y axis
   };
 }
 
 /**
- * Convert real world coordinates to pixel coordinates
+ * Convert real world coordinates to pixel coordinates  
+ * Bottom-left origin: (0,0) at bottom-left, x goes right, y goes up
  */
 export function realToPixel(
   realX: number,
   realY: number,
   floorPlan: { width: number; height: number; pixelsPerMeter: number }
 ): { x: number; y: number } {
+  const canvasHeight = floorPlan.height * floorPlan.pixelsPerMeter;
   return {
     x: realX * floorPlan.pixelsPerMeter,
-    y: realY * floorPlan.pixelsPerMeter
+    y: canvasHeight - (realY * floorPlan.pixelsPerMeter) // Flip Y axis
   };
 }
