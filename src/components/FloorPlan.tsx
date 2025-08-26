@@ -55,9 +55,29 @@ export const FloorPlan: React.FC = () => {
       const container = canvasRef.current?.parentElement;
       if (container) {
         const rect = container.getBoundingClientRect();
+        const containerWidth = rect.width - 32;
+        const containerHeight = rect.height - 32;
+        
+        // Calculate aspect ratio of the room
+        const roomAspectRatio = floorPlan.width / floorPlan.height; // 20.67 / 36.70 ≈ 0.56
+        const containerAspectRatio = containerWidth / containerHeight;
+        
+        let canvasWidth, canvasHeight;
+        
+        // Fit the room to the container while maintaining aspect ratio
+        if (containerAspectRatio > roomAspectRatio) {
+          // Container is wider than room ratio - limit by height
+          canvasHeight = Math.max(400, containerHeight);
+          canvasWidth = canvasHeight * roomAspectRatio;
+        } else {
+          // Container is taller than room ratio - limit by width
+          canvasWidth = Math.max(400, containerWidth);
+          canvasHeight = canvasWidth / roomAspectRatio;
+        }
+        
         setCanvasSize({
-          width: Math.max(800, rect.width - 32),
-          height: Math.max(600, rect.height - 32)
+          width: canvasWidth,
+          height: canvasHeight
         });
       }
     };
@@ -65,7 +85,7 @@ export const FloorPlan: React.FC = () => {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, []);
+  }, [floorPlan.width, floorPlan.height]);
 
   // Draw the floor plan
   useEffect(() => {
