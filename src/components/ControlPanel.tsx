@@ -17,6 +17,7 @@ export const ControlPanel: React.FC = () => {
     apiConfig,
     apiClient,
     floorPlan,
+    scale,
     updateDimmer,
     updateColor,
     updateGobo,
@@ -25,7 +26,8 @@ export const ControlPanel: React.FC = () => {
     initializeApi,
     updateFixtureHeight,
     updateFixturePosition,
-    adjustFixtureSpacing
+    adjustFixtureSpacing,
+    setScale
   } = useLightingStore();
 
   const [tempApiConfig, setTempApiConfig] = useState({
@@ -436,6 +438,24 @@ export const ControlPanel: React.FC = () => {
 
             {/* Floor Plan Setup */}
             <FloorPlanUpload />
+
+            {/* Floor Plan Scale */}
+            <div className="space-y-2">
+              <Label htmlFor="floor-plan-scale">Floor Plan Scale</Label>
+              <div className="flex items-center space-x-3">
+                <Slider
+                  value={[scale]}
+                  onValueChange={(value) => setScale(value[0])}
+                  min={0.2}
+                  max={1.5}
+                  step={0.1}
+                  className="flex-1"
+                />
+                <span className="text-sm font-mono w-12 text-right">
+                  {Math.round(scale * 100)}%
+                </span>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </CardContent>

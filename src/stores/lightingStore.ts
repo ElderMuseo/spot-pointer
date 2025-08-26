@@ -24,6 +24,7 @@ interface LightingStore extends LightingState {
   updateFixtureHeight: (height: number) => void;
   updateFixturePosition: (id: number, x: number, y: number) => void;
   adjustFixtureSpacing: (spacing: number) => void;
+  setScale: (scale: number) => void;
   // API client
   apiClient: GrandMA2ApiClient | null;
   initializeApi: (baseUrl: string, grandma2Host: string, grandma2Port: number) => Promise<boolean>;
@@ -89,6 +90,7 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     grandma2Host: '192.168.1.100',
     grandma2Port: 30000,
   },
+  scale: 0.5,
   targetPoint: null,
   apiClient: null,
 
@@ -155,7 +157,11 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     )
   })),
 
-  setTargetPoint: (x, y) => set({ targetPoint: { x, y } }),
+  setTargetPoint: (x: number, y: number) => 
+    set({ targetPoint: { x, y } }),
+
+  setScale: (scale: number) => 
+    set({ scale }),
 
   aimFixtureAt: (fixtureId, x, y) => {
     const state = get();

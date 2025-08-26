@@ -63,4 +63,5 @@ export interface LightingState {
   presets: Preset[];
   apiConfig: ApiConfig;
   targetPoint: { x: number; y: number } | null;
+  scale: number;
 }

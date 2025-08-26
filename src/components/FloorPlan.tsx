@@ -6,13 +6,13 @@ import { pixelToReal, realToPixel, calculateLightCone } from '../utils/geometry'
 export const FloorPlan: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
-  const [scale, setScale] = useState(0.5); // Scale factor for canvas size
   
   const {
     fixtures,
     floorPlan,
     selectedFixtures,
     targetPoint,
+    scale,
     selectFixture,
     aimFixtureAt,
     setTargetPoint
@@ -332,21 +332,6 @@ export const FloorPlan: React.FC = () => {
           />
         );
       })}
-      
-      {/* Scale Control */}
-      <div className="absolute top-4 right-4 bg-background/80 px-3 py-2 rounded">
-        <div className="text-sm text-muted-foreground mb-2">Scale:</div>
-        <input
-          type="range"
-          min="0.2"
-          max="1.5"
-          step="0.1"
-          value={scale}
-          onChange={(e) => setScale(parseFloat(e.target.value))}
-          className="w-20"
-        />
-        <div className="text-xs text-center">{Math.round(scale * 100)}%</div>
-      </div>
       
       {/* Grid coordinates overlay */}
       <div className="absolute top-4 left-4 text-sm text-muted-foreground bg-background/80 px-3 py-2 rounded">
