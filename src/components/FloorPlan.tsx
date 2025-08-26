@@ -6,6 +6,7 @@ import { pixelToReal, realToPixel, calculateLightCone } from '../utils/geometry'
 export const FloorPlan: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [scale, setScale] = useState(0.5); // Scale factor for canvas size
   
   const {
     fixtures,
@@ -23,8 +24,11 @@ export const FloorPlan: React.FC = () => {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const scaleX = canvasSize.width / rect.width;
+    const scaleY = canvasSize.height / rect.height;
+    
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
 
     // Convert pixel coordinates to real world coordinates
     const realCoords = pixelToReal(x, y, {
@@ -62,22 +66,23 @@ export const FloorPlan: React.FC = () => {
         const roomAspectRatio = floorPlan.width / floorPlan.height; // 20.67 / 36.70 ≈ 0.56
         const containerAspectRatio = containerWidth / containerHeight;
         
-        let canvasWidth, canvasHeight;
+        let baseCanvasWidth, baseCanvasHeight;
         
         // Fit the room to the container while maintaining aspect ratio
         if (containerAspectRatio > roomAspectRatio) {
           // Container is wider than room ratio - limit by height
-          canvasHeight = Math.max(400, containerHeight);
-          canvasWidth = canvasHeight * roomAspectRatio;
+          baseCanvasHeight = Math.max(400, containerHeight);
+          baseCanvasWidth = baseCanvasHeight * roomAspectRatio;
         } else {
           // Container is taller than room ratio - limit by width
-          canvasWidth = Math.max(400, containerWidth);
-          canvasHeight = canvasWidth / roomAspectRatio;
+          baseCanvasWidth = Math.max(400, containerWidth);
+          baseCanvasHeight = baseCanvasWidth / roomAspectRatio;
         }
         
+        // Apply scale factor
         setCanvasSize({
-          width: canvasWidth,
-          height: canvasHeight
+          width: baseCanvasWidth * scale,
+          height: baseCanvasHeight * scale
         });
       }
     };
@@ -85,7 +90,7 @@ export const FloorPlan: React.FC = () => {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [floorPlan.width, floorPlan.height]);
+  }, [floorPlan.width, floorPlan.height, scale]);
 
   // Draw the floor plan
   useEffect(() => {
@@ -293,9 +298,15 @@ export const FloorPlan: React.FC = () => {
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        className="w-full h-full cursor-crosshair"
+        className="cursor-crosshair"
         onClick={handleCanvasClick}
-        style={{ imageRendering: 'crisp-edges' }}
+        style={{ 
+          imageRendering: 'crisp-edges',
+          width: canvasSize.width,
+          height: canvasSize.height,
+          maxWidth: '100%',
+          maxHeight: '100%'
+        }}
       />
       
       {/* Fixture click handlers */}
@@ -321,6 +332,21 @@ export const FloorPlan: React.FC = () => {
           />
         );
       })}
+      
+      {/* Scale Control */}
+      <div className="absolute top-4 right-4 bg-background/80 px-3 py-2 rounded">
+        <div className="text-sm text-muted-foreground mb-2">Scale:</div>
+        <input
+          type="range"
+          min="0.2"
+          max="1.5"
+          step="0.1"
+          value={scale}
+          onChange={(e) => setScale(parseFloat(e.target.value))}
+          className="w-20"
+        />
+        <div className="text-xs text-center">{Math.round(scale * 100)}%</div>
+      </div>
       
       {/* Grid coordinates overlay */}
       <div className="absolute top-4 left-4 text-sm text-muted-foreground bg-background/80 px-3 py-2 rounded">
