@@ -77,29 +77,29 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content - Map takes full height */}
-      <div className="flex-1 flex flex-col min-h-0">
+      {/* Main Content - Horizontal layout */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
         {/* Floor Plan - Takes most of the screen */}
         <div className="flex-1 p-4 min-h-0">
           <FloorPlan />
         </div>
         
-        {/* Control Panels - Fixed height at bottom */}
-        <div className="flex-shrink-0 border-t border-border bg-card/30 backdrop-blur">
-          <div className="container mx-auto px-4 py-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Control Panels - Side panel */}
+        <div className="flex-shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-card/30 backdrop-blur w-full lg:w-96">
+          <div className="p-4 h-full">
+            <div className="flex flex-col gap-4 h-full">
               {/* Fixture List - Individual Controls */}
-              <div className="order-1">
+              <div className="flex-1 min-h-0">
                 <FixtureList />
               </div>
               
               {/* Control Panel - Group Controls */}
-              <div className="order-2">
+              <div className="flex-1 min-h-0">
                 <ControlPanel />
               </div>
               
               {/* Preset Manager */}
-              <div className="order-3">
+              <div className="flex-1 min-h-0">
                 <PresetManager />
               </div>
             </div>
