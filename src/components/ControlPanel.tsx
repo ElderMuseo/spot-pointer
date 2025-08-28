@@ -22,6 +22,7 @@ export const ControlPanel: React.FC = () => {
     updateColor,
     updateGobo,
     updateIris,
+    updateFocus,
     updateApiConfig,
     initializeApi,
     updateFixtureHeight,
@@ -44,6 +45,7 @@ export const ControlPanel: React.FC = () => {
   const commonColor = hasSelection ? selectedFixtureData[0]?.color : { r: 255, g: 255, b: 255 };
   const commonGobo = hasSelection ? selectedFixtureData[0]?.gobo : 0;
   const commonIris = hasSelection ? selectedFixtureData[0]?.iris : 50;
+  const commonFocus = hasSelection ? selectedFixtureData[0]?.focus : 50;
 
   const handleDimmerChange = (value: number[]) => {
     if (hasSelection) {
@@ -67,6 +69,12 @@ export const ControlPanel: React.FC = () => {
   const handleIrisChange = (value: number[]) => {
     if (hasSelection) {
       updateIris(selectedFixtures, value[0]);
+    }
+  };
+
+  const handleFocusChange = (value: number[]) => {
+    if (hasSelection) {
+      updateFocus(selectedFixtures, value[0]);
     }
   };
 
@@ -192,6 +200,24 @@ export const ControlPanel: React.FC = () => {
                 />
                 <span className="text-sm font-mono w-12 text-right">
                   {commonIris}%
+                </span>
+              </div>
+            </div>
+
+            {/* Focus Control */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Focus</Label>
+              <div className="flex items-center space-x-3">
+                <Slider
+                  value={[commonFocus]}
+                  onValueChange={handleFocusChange}
+                  max={100}
+                  step={1}
+                  className="flex-1"
+                  disabled={!hasSelection}
+                />
+                <span className="text-sm font-mono w-12 text-right">
+                  {commonFocus}%
                 </span>
               </div>
             </div>

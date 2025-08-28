@@ -136,7 +136,7 @@ export class GrandMA2ApiClient {
   }
 
   /**
-   * Send color commands using raw command
+   * Send color commands using dedicated endpoint
    */
   async sendColor(fixtureIds: number[], r: number, g: number, b: number): Promise<void> {
     if (!this.connected) {
@@ -145,18 +145,23 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const fixtureList = this.formatFixtureList(fixtureIds);
-      const commands = [
-        `Fixture ${fixtureList} Attribute "Red" At ${Math.round((r / 255) * 100)}`,
-        `Fixture ${fixtureList} Attribute "Green" At ${Math.round((g / 255) * 100)}`,
-        `Fixture ${fixtureList} Attribute "Blue" At ${Math.round((b / 255) * 100)}`
-      ];
+      const response = await fetch(`${this.baseUrl}/fixtures/color`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fixtures: fixtureIds,
+          r: Math.round((r / 255) * 100),
+          g: Math.round((g / 255) * 100),
+          b: Math.round((b / 255) * 100)
+        })
+      });
 
-      for (const command of commands) {
-        await this.sendRawCommand(command);
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Color sent for fixtures ${fixtureIds.join(',')}: RGB(${r},${g},${b})`);
+      } else {
+        throw new Error('Color command failed');
       }
-      
-      this.log(`Color sent for fixtures ${fixtureIds.join(',')}: RGB(${r},${g},${b})`);
     } catch (error) {
       this.log(`Color error: ${error}`);
     }
@@ -183,7 +188,7 @@ export class GrandMA2ApiClient {
   }
 
   /**
-   * Send iris command using raw command
+   * Send iris command using dedicated endpoint
    */
   async sendIris(fixtureIds: number[], iris: number): Promise<void> {
     if (!this.connected) {
@@ -192,13 +197,53 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const fixtureList = this.formatFixtureList(fixtureIds);
-      const command = `Fixture ${fixtureList} Attribute "Iris" At ${iris}`;
-      
-      await this.sendRawCommand(command);
-      this.log(`Iris sent for fixtures ${fixtureIds.join(',')}: ${iris}%`);
+      const response = await fetch(`${this.baseUrl}/fixtures/iris`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fixtures: fixtureIds,
+          iris: iris
+        })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Iris sent for fixtures ${fixtureIds.join(',')}: ${iris}%`);
+      } else {
+        throw new Error('Iris command failed');
+      }
     } catch (error) {
       this.log(`Iris error: ${error}`);
+    }
+  }
+
+  /**
+   * Send focus command using dedicated endpoint
+   */
+  async sendFocus(fixtureIds: number[], focus: number): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/fixtures/focus`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fixtures: fixtureIds,
+          focus: focus
+        })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Focus sent for fixtures ${fixtureIds.join(',')}: ${focus}%`);
+      } else {
+        throw new Error('Focus command failed');
+      }
+    } catch (error) {
+      this.log(`Focus error: ${error}`);
     }
   }
 

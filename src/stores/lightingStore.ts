@@ -16,6 +16,7 @@ interface LightingStore extends LightingState {
   updateColor: (fixtureIds: number[], r: number, g: number, b: number) => void;
   updateGobo: (fixtureIds: number[], gobo: number) => void;
   updateIris: (fixtureIds: number[], iris: number) => void;
+  updateFocus: (fixtureIds: number[], focus: number) => void;
   savePreset: (name: string, description: string) => void;
   loadPreset: (presetId: string) => void;
   deletePreset: (presetId: string) => void;
@@ -63,6 +64,7 @@ const defaultFixtures: Fixture[] = lightXPositions.map((x, index) => ({
   gobo: 0,
   zoom: 15,
   iris: 50,
+  focus: 50,
   isSelected: false,
   targetX: x,
   targetY: ROOM_LENGTH_Y / 2, // Default target at room center
@@ -241,6 +243,19 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     }));
   },
 
+  updateFocus: (fixtureIds, focus) => {
+    // Send focus command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendFocus(fixtureIds, focus);
+    }
+    
+    set(state => ({
+      fixtures: state.fixtures.map(f => 
+        fixtureIds.includes(f.id) ? { ...f, focus } : f
+      )
+    }));
+  },
+
   savePreset: (name, description) => {
     const state = get();
     const preset: Preset = {
@@ -262,7 +277,7 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     if (!preset) return;
     
     set({
-      fixtures: preset.fixtures.map(f => ({ ...f, isSelected: false }))
+      fixtures: preset.fixtures.map(f => ({ ...f, isSelected: false, focus: f.focus || 50 }))
     });
   },
 

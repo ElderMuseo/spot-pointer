@@ -14,6 +14,7 @@ export interface Fixture {
   gobo: number; // Gobo index
   zoom: number; // Beam angle/zoom
   iris: number; // Iris opening (0-100%)
+  focus: number; // Focus (0-100%)
   isSelected: boolean;
   // Individual target point for this fixture
   targetX: number;
