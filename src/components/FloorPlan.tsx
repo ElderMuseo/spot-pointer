@@ -63,26 +63,25 @@ export const FloorPlan: React.FC = () => {
         const containerHeight = rect.height - 32;
         
         // Calculate aspect ratio of the room
-        const roomAspectRatio = floorPlan.width / floorPlan.height; // 20.67 / 36.70 ≈ 0.56
+        const roomAspectRatio = floorPlan.width / floorPlan.height;
         const containerAspectRatio = containerWidth / containerHeight;
         
-        let baseCanvasWidth, baseCanvasHeight;
+        let canvasWidth, canvasHeight;
         
-        // Fit the room to the container while maintaining aspect ratio
+        // Fit the room to the container while maintaining aspect ratio and maximizing space usage
         if (containerAspectRatio > roomAspectRatio) {
-          // Container is wider than room ratio - limit by height
-          baseCanvasHeight = Math.max(400, containerHeight);
-          baseCanvasWidth = baseCanvasHeight * roomAspectRatio;
+          // Container is wider than room ratio - use full height, scale width
+          canvasHeight = Math.max(300, containerHeight) * scale;
+          canvasWidth = canvasHeight * roomAspectRatio;
         } else {
-          // Container is taller than room ratio - limit by width
-          baseCanvasWidth = Math.max(400, containerWidth);
-          baseCanvasHeight = baseCanvasWidth / roomAspectRatio;
+          // Container is taller than room ratio - use full width, scale height  
+          canvasWidth = Math.max(300, containerWidth) * scale;
+          canvasHeight = canvasWidth / roomAspectRatio;
         }
         
-        // Apply scale factor
         setCanvasSize({
-          width: baseCanvasWidth * scale,
-          height: baseCanvasHeight * scale
+          width: canvasWidth,
+          height: canvasHeight
         });
       }
     };
@@ -293,7 +292,7 @@ export const FloorPlan: React.FC = () => {
   }, [fixtures, floorPlan, selectedFixtures, targetPoint, canvasSize]);
 
   return (
-    <div className="relative w-full h-full bg-card rounded-lg border border-border overflow-hidden">
+    <div className="relative w-full h-full bg-card rounded-lg border border-border overflow-hidden flex items-center justify-center">
       <canvas
         ref={canvasRef}
         width={canvasSize.width}
@@ -302,10 +301,9 @@ export const FloorPlan: React.FC = () => {
         onClick={handleCanvasClick}
         style={{ 
           imageRendering: 'crisp-edges',
-          width: canvasSize.width,
-          height: canvasSize.height,
           maxWidth: '100%',
-          maxHeight: '100%'
+          maxHeight: '100%',
+          objectFit: 'contain'
         }}
       />
       

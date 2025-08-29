@@ -85,21 +85,21 @@ const Index = () => {
         </div>
         
         {/* Control Panels - Side panel */}
-        <div className="flex-shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-card/30 backdrop-blur w-full lg:w-96">
-          <div className="p-4 h-full">
-            <div className="flex flex-col gap-4 h-full">
+        <div className="flex-shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-card/30 backdrop-blur w-full lg:w-80 xl:w-96">
+          <div className="p-3 h-full overflow-hidden">
+            <div className="flex flex-col gap-3 h-full">
               {/* Fixture List - Individual Controls */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <FixtureList />
               </div>
               
               {/* Control Panel - Group Controls */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <ControlPanel />
               </div>
               
               {/* Preset Manager */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <PresetManager />
               </div>
             </div>
