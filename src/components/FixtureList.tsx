@@ -44,7 +44,7 @@ export const FixtureList: React.FC = () => {
   const hasSelection = selectedFixtures.length > 0;
 
   return (
-    <Card className="control-panel h-full">
+    <Card className="control-panel h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
           <Target className="w-5 h-5" />
@@ -82,9 +82,9 @@ export const FixtureList: React.FC = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1 overflow-hidden">
         {/* Individual Fixture Controls */}
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="space-y-2 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           {fixtures.map((fixture) => {
             const isSelected = selectedFixtures.includes(fixture.id);
             const isActive = fixture.dimmer > 0;

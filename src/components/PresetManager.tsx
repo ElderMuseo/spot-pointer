@@ -44,7 +44,7 @@ export const PresetManager: React.FC = () => {
   };
 
   return (
-    <Card className="control-panel h-full">
+    <Card className="control-panel h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-primary">
@@ -111,7 +111,7 @@ export const PresetManager: React.FC = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1 overflow-hidden">
         {presets.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Save className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -119,7 +119,7 @@ export const PresetManager: React.FC = () => {
             <p className="text-xs">Save your current lighting setup to quickly recall it later</p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
             {presets.map((preset) => (
               <Card key={preset.id} className="bg-preset-bg border-border/50">
                 <CardContent className="p-3">
