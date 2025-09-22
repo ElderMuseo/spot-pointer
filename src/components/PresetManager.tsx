@@ -111,7 +111,7 @@ export const PresetManager: React.FC = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3 flex-1 overflow-hidden">
+      <CardContent className="space-y-3 flex-1 overflow-y-auto custom-scrollbar p-4">
         {presets.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Save className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -119,7 +119,7 @@ export const PresetManager: React.FC = () => {
             <p className="text-xs">Save your current lighting setup to quickly recall it later</p>
           </div>
         ) : (
-          <div className="space-y-2 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+          <div className="space-y-2 h-full overflow-y-auto custom-scrollbar max-h-[calc(100vh-280px)]">
             {presets.map((preset) => (
               <Card key={preset.id} className="bg-preset-bg border-border/50">
                 <CardContent className="p-3">

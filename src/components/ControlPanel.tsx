@@ -130,8 +130,8 @@ export const ControlPanel: React.FC = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4 flex-1 overflow-hidden">
-        <Tabs defaultValue="lighting" className="w-full">
+      <CardContent className="space-y-4 flex-1 overflow-y-auto custom-scrollbar p-4">
+        <Tabs defaultValue="lighting" className="w-full h-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="lighting">
               <Lightbulb className="w-4 h-4 mr-1" />
@@ -147,7 +147,7 @@ export const ControlPanel: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="lighting" className="space-y-4 mt-4 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+          <TabsContent value="lighting" className="space-y-4 mt-4 overflow-y-auto custom-scrollbar max-h-[calc(100vh-280px)]">
             {/* Dimmer Control */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Dimmer</Label>
@@ -246,7 +246,7 @@ export const ControlPanel: React.FC = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="color" className="space-y-4 mt-4 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+          <TabsContent value="color" className="space-y-4 mt-4 overflow-y-auto custom-scrollbar max-h-[calc(100vh-280px)]">
             {/* RGB Controls */}
             <div className="space-y-4">
               <div className="space-y-2">
@@ -341,7 +341,7 @@ export const ControlPanel: React.FC = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="setup" className="space-y-4 mt-4 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+          <TabsContent value="setup" className="space-y-4 mt-4 overflow-y-auto custom-scrollbar max-h-[calc(100vh-280px)]">
             {/* API Configuration */}
             <div className="space-y-4">
               <div className="space-y-2">
