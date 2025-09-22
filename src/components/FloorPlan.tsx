@@ -59,8 +59,8 @@ export const FloorPlan: React.FC = () => {
       const container = canvasRef.current?.parentElement;
       if (container) {
         const rect = container.getBoundingClientRect();
-        const containerWidth = rect.width - 32;
-        const containerHeight = rect.height - 32;
+        const containerWidth = rect.width - 16; // Reduced padding
+        const containerHeight = rect.height - 16; // Reduced padding
         
         // Fixed floor plan dimensions: 20.67m × 36.7m (aspect ratio ≈ 0.563)
         const roomAspectRatio = 20.67 / 36.7;
@@ -68,14 +68,14 @@ export const FloorPlan: React.FC = () => {
         
         let canvasWidth, canvasHeight;
         
-        // Maximize canvas size to fill available container space
+        // Maximize canvas size to fill available container space completely
         if (containerAspectRatio > roomAspectRatio) {
           // Container is wider than room ratio - use full height
-          canvasHeight = Math.max(400, containerHeight);
+          canvasHeight = containerHeight;
           canvasWidth = canvasHeight * roomAspectRatio;
         } else {
           // Container is taller than room ratio - use full width
-          canvasWidth = Math.max(300, containerWidth);
+          canvasWidth = containerWidth;
           canvasHeight = canvasWidth / roomAspectRatio;
         }
         
