@@ -24,11 +24,17 @@ export const FloorPlan: React.FC = () => {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvasSize.width / rect.width;
-    const scaleY = canvasSize.height / rect.height;
     
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    // Get click position relative to canvas display size
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+    
+    // Convert to canvas coordinates (accounting for any CSS scaling)
+    const canvasX = (clickX / rect.width) * canvasSize.width;
+    const canvasY = (clickY / rect.height) * canvasSize.height;
+    
+    const x = canvasX;
+    const y = canvasY;
 
     // Convert pixel coordinates to real world coordinates
     const realCoords = pixelToReal(x, y, {
