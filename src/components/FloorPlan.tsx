@@ -33,14 +33,14 @@ export const FloorPlan: React.FC = () => {
     const canvasX = (clickX / rect.width) * canvasSize.width;
     const canvasY = (clickY / rect.height) * canvasSize.height;
     
-    const x = canvasX;
-    const y = canvasY;
-
+    // Calculate pixels per meter based on current canvas size
+    const pixelsPerMeter = canvasSize.width / floorPlan.width;
+    
     // Convert pixel coordinates to real world coordinates
-    const realCoords = pixelToReal(x, y, {
+    const realCoords = pixelToReal(canvasX, canvasY, {
       width: floorPlan.width,
       height: floorPlan.height,
-      pixelsPerMeter: canvasSize.width / floorPlan.width
+      pixelsPerMeter: pixelsPerMeter
     });
 
     setTargetPoint(realCoords.x, realCoords.y);
