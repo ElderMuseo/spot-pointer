@@ -20,8 +20,8 @@ const Index = () => {
 
   // Initialize API connection on mount
   useEffect(() => {
-    initializeApi(apiConfig.baseUrl, apiConfig.grandma2Host, apiConfig.grandma2Port);
-  }, [initializeApi, apiConfig.baseUrl, apiConfig.grandma2Host, apiConfig.grandma2Port]);
+    initializeApi(apiConfig.baseUrl);
+  }, [initializeApi, apiConfig.baseUrl]);
 
   const activeFixtures = fixtures.filter(f => f.dimmer > 0).length;
   const selectedCount = selectedFixtures.length;

@@ -28,7 +28,7 @@ interface LightingStore extends LightingState {
   setScale: (scale: number) => void;
   // API client
   apiClient: GrandMA2ApiClient | null;
-  initializeApi: (baseUrl: string, grandma2Host: string, grandma2Port: number) => Promise<boolean>;
+  initializeApi: (baseUrl: string) => Promise<boolean>;
 }
 
 // Room parameters (matching Python code)
@@ -324,7 +324,7 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     };
   }),
 
-  initializeApi: async (baseUrl: string, grandma2Host: string, grandma2Port: number) => {
+  initializeApi: async (baseUrl: string) => {
     const { apiClient } = get();
     
     // Disconnect existing client
@@ -343,14 +343,21 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
       }
     );
 
-    // Try to connect
+    // Try to connect - this will fetch the GrandMA2 config from /health
     const connected = await newClient.connect();
     
     if (connected) {
+      // Get the GrandMA2 config from the API
+      const grandma2Config = newClient.getGrandMA2Config();
+      
       set((state) => ({
         ...state,
         apiClient: newClient,
-        apiConfig: { baseUrl, grandma2Host, grandma2Port }
+        apiConfig: { 
+          baseUrl, 
+          grandma2Host: grandma2Config.host, 
+          grandma2Port: grandma2Config.port 
+        }
       }));
     }
 

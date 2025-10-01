@@ -1,6 +1,8 @@
 export class GrandMA2ApiClient {
   private baseUrl: string;
   private connected = false;
+  private grandma2Host: string = '';
+  private grandma2Port: number = 30000;
 
   constructor(
     private apiBaseUrl: string = 'http://localhost:8000',
@@ -12,6 +14,7 @@ export class GrandMA2ApiClient {
 
   /**
    * Check API health and connection status
+   * Automatically fetches GrandMA2 configuration from the API
    */
   async connect(): Promise<boolean> {
     try {
@@ -24,6 +27,10 @@ export class GrandMA2ApiClient {
 
       const health = await healthResponse.json();
       if (health.status === 'ok') {
+        // Store the GrandMA2 configuration from the health endpoint
+        this.grandma2Host = health.host;
+        this.grandma2Port = health.port;
+        
         this.connected = true;
         this.onConnectionChange?.(true);
         this.log(`Connected to GrandMA2 API successfully (${health.host}:${health.port})`);
@@ -37,6 +44,16 @@ export class GrandMA2ApiClient {
       this.onConnectionChange?.(false);
       return false;
     }
+  }
+
+  /**
+   * Get the GrandMA2 host and port from the last successful connection
+   */
+  getGrandMA2Config(): { host: string; port: number } {
+    return {
+      host: this.grandma2Host,
+      port: this.grandma2Port
+    };
   }
 
   /**

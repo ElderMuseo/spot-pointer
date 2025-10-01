@@ -31,11 +31,7 @@ export const ControlPanel: React.FC = () => {
     setScale
   } = useLightingStore();
 
-  const [tempApiConfig, setTempApiConfig] = useState({
-    baseUrl: apiConfig.baseUrl,
-    grandma2Host: apiConfig.grandma2Host,
-    grandma2Port: apiConfig.grandma2Port
-  });
+  const [tempApiUrl, setTempApiUrl] = useState(apiConfig.baseUrl);
 
   const selectedFixtureData = fixtures.filter(f => selectedFixtures.includes(f.id));
   const hasSelection = selectedFixtures.length > 0;
@@ -78,9 +74,11 @@ export const ControlPanel: React.FC = () => {
     }
   };
 
-  const connectToApi = () => {
-    updateApiConfig(tempApiConfig.baseUrl, tempApiConfig.grandma2Host, tempApiConfig.grandma2Port);
-    initializeApi(tempApiConfig.baseUrl, tempApiConfig.grandma2Host, tempApiConfig.grandma2Port);
+  const connectToApi = async () => {
+    const connected = await initializeApi(tempApiUrl);
+    if (!connected) {
+      console.error('Failed to connect to API');
+    }
   };
 
   const gobos = [
@@ -348,31 +346,13 @@ export const ControlPanel: React.FC = () => {
                 <Label htmlFor="api-url">API Base URL</Label>
                 <Input
                   id="api-url"
-                  value={tempApiConfig.baseUrl}
-                  onChange={(e) => setTempApiConfig(prev => ({ ...prev, baseUrl: e.target.value }))}
+                  value={tempApiUrl}
+                  onChange={(e) => setTempApiUrl(e.target.value)}
                   placeholder="http://localhost:8000"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="grandma2-ip">GrandMA2 IP Address</Label>
-                <Input
-                  id="grandma2-ip"
-                  value={tempApiConfig.grandma2Host}
-                  onChange={(e) => setTempApiConfig(prev => ({ ...prev, grandma2Host: e.target.value }))}
-                  placeholder="192.168.1.100"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="grandma2-port">GrandMA2 Port</Label>
-                <Input
-                  id="grandma2-port"
-                  type="number"
-                  value={tempApiConfig.grandma2Port}
-                  onChange={(e) => setTempApiConfig(prev => ({ ...prev, grandma2Port: parseInt(e.target.value) || 30000 }))}
-                  placeholder="30000"
-                />
+                <p className="text-xs text-muted-foreground">
+                  GrandMA2 configuration will be automatically retrieved from the API
+                </p>
               </div>
 
               <Button 
@@ -380,8 +360,25 @@ export const ControlPanel: React.FC = () => {
                 className="w-full"
                 variant={(apiClient && apiClient.isConnected()) ? "secondary" : "default"}
               >
-                {(apiClient && apiClient.isConnected()) ? "Reconnect" : "Connect"} to GrandMA2
+                {(apiClient && apiClient.isConnected()) ? "Reconnect" : "Connect"} to API
               </Button>
+
+              {/* Show GrandMA2 config if connected */}
+              {(apiClient && apiClient.isConnected()) && (
+                <div className="space-y-2 p-3 bg-muted rounded-lg">
+                  <Label className="text-sm font-medium">GrandMA2 Configuration</Label>
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Host:</span>
+                      <span className="font-mono">{apiConfig.grandma2Host}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Port:</span>
+                      <span className="font-mono">{apiConfig.grandma2Port}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Fixture Height */}
