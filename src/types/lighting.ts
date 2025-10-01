@@ -55,6 +55,8 @@ export interface ApiConfig {
   baseUrl: string;
   grandma2Host: string;
   grandma2Port: number;
+  user?: string;
+  password?: string;
 }
 
 export interface LightingState {

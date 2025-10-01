@@ -351,7 +351,9 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     try {
       await newClient.updateConfig({
         host: grandma2Host,
-        port: grandma2Port
+        port: grandma2Port,
+        user: 'administrator',
+        password: 'admin'
       });
     } catch (error) {
       console.error('Failed to update GrandMA2 config:', error);

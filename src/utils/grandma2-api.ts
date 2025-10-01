@@ -3,10 +3,8 @@ import { Fixture } from '../types/lighting';
 export interface GrandMA2Config {
   host: string;
   port: number;
-  login?: {
-    user: string;
-    password: string;
-  } | null;
+  user: string;
+  password: string;
 }
 
 export interface FixtureMoveRequest {
