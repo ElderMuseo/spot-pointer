@@ -173,13 +173,9 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     // Calculate pan/tilt with floor level target (z=0) and fixture height
     const { pan, tilt } = calculatePanTilt(fixture, x, y, 0);
     
-    // Convert to percentages for API
-    const panPercent = degreesToPercent(pan, fixture.panRange.min, fixture.panRange.max);
-    const tiltPercent = degreesToPercent(tilt, fixture.tiltRange.min, fixture.tiltRange.max);
-    
-    // Send pan/tilt to API if connected
+    // Send pan/tilt to API if connected (now using real degree values)
     if (get().apiClient) {
-      get().apiClient.sendPanTilt(fixtureId, panPercent, tiltPercent);
+      get().apiClient.sendPanTilt(fixtureId, pan, tilt);
     }
     
     // Update local state - only update this fixture's target and position
@@ -346,18 +342,6 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
         console.log(`GrandMA2 API log: ${message}`);
       }
     );
-
-    // Update GrandMA2 configuration first
-    try {
-      await newClient.updateConfig({
-        host: grandma2Host,
-        port: grandma2Port,
-        user: 'administrator',
-        password: 'admin'
-      });
-    } catch (error) {
-      console.error('Failed to update GrandMA2 config:', error);
-    }
 
     // Try to connect
     const connected = await newClient.connect();

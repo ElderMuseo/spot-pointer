@@ -1,20 +1,3 @@
-import { Fixture } from '../types/lighting';
-
-export interface GrandMA2Config {
-  host: string;
-  port: number;
-  user: string;
-  password: string;
-}
-
-export interface FixtureMoveRequest {
-  fixtures?: number[];
-  range?: { start: number; end: number };
-  selector?: string;
-  pan?: number;
-  tilt?: number;
-}
-
 export class GrandMA2ApiClient {
   private baseUrl: string;
   private connected = false;
@@ -34,23 +17,19 @@ export class GrandMA2ApiClient {
     try {
       this.log('Checking API connection...');
       
-      // Check API health
       const healthResponse = await fetch(`${this.baseUrl}/health`);
       if (!healthResponse.ok) {
         throw new Error('API not responding');
       }
 
-      // Check GrandMA2 connection
-      const statusResponse = await fetch(`${this.baseUrl}/status/connection`);
-      const status = await statusResponse.json();
-      
-      if (status.reachable) {
+      const health = await healthResponse.json();
+      if (health.status === 'ok') {
         this.connected = true;
         this.onConnectionChange?.(true);
-        this.log('Connected to GrandMA2 successfully');
+        this.log(`Connected to GrandMA2 API successfully (${health.host}:${health.port})`);
         return true;
       } else {
-        throw new Error(status.error || 'GrandMA2 not reachable');
+        throw new Error('API health check failed');
       }
     } catch (error) {
       this.log(`Connection failed: ${error}`);
@@ -61,27 +40,10 @@ export class GrandMA2ApiClient {
   }
 
   /**
-   * Get current configuration
-   */
-  async getConfig(): Promise<GrandMA2Config> {
-    const response = await fetch(`${this.baseUrl}/config`);
-    return response.json();
-  }
-
-  /**
-   * Update configuration
-   */
-  async updateConfig(config: Partial<GrandMA2Config>): Promise<GrandMA2Config> {
-    const response = await fetch(`${this.baseUrl}/config`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config)
-    });
-    return response.json();
-  }
-
-  /**
-   * Send pan and tilt commands for fixtures
+   * Send pan and tilt commands for a single fixture
+   * @param fixtureId - Fixture ID
+   * @param pan - Pan value in degrees (e.g., -270 to +270)
+   * @param tilt - Tilt value in degrees (e.g., -134 to +134)
    */
   async sendPanTilt(fixtureId: number, pan: number, tilt: number): Promise<void> {
     if (!this.connected) {
@@ -90,21 +52,19 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const request: FixtureMoveRequest = {
-        fixtures: [fixtureId],
-        pan: pan,
-        tilt: tilt
-      };
-
-      const response = await fetch(`${this.baseUrl}/fixtures/move`, {
+      const response = await fetch(`${this.baseUrl}/move/fixture`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
+        body: JSON.stringify({
+          fixture: fixtureId,
+          pan,
+          tilt
+        })
       });
 
       const result = await response.json();
       if (result.ok) {
-        this.log(`Pan/Tilt sent for fixture ${fixtureId}: Pan=${pan}, Tilt=${tilt}`);
+        this.log(`Pan/Tilt sent for fixture ${fixtureId}: Pan=${pan}°, Tilt=${tilt}°`);
       } else {
         throw new Error('Command failed');
       }
@@ -114,7 +74,7 @@ export class GrandMA2ApiClient {
   }
 
   /**
-   * Send dimmer command using raw command
+   * Send dimmer command for fixtures (0-100%)
    */
   async sendDimmer(fixtureIds: number[], dimmer: number): Promise<void> {
     if (!this.connected) {
@@ -123,18 +83,33 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const fixtureList = this.formatFixtureList(fixtureIds);
-      const command = `Fixture ${fixtureList} Attribute "Dimmer" At ${dimmer}`;
+      const body: any = { value: dimmer };
       
-      await this.sendRawCommand(command);
-      this.log(`Dimmer sent for fixtures ${fixtureIds.join(',')}: ${dimmer}%`);
+      if (fixtureIds.length === 1) {
+        body.fixture = fixtureIds[0];
+      } else {
+        body.fixtures = fixtureIds;
+      }
+
+      const response = await fetch(`${this.baseUrl}/dim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Dimmer sent for fixtures ${fixtureIds.join(',')}: ${dimmer}%`);
+      } else {
+        throw new Error('Dimmer command failed');
+      }
     } catch (error) {
       this.log(`Dimmer error: ${error}`);
     }
   }
 
   /**
-   * Send color commands using dedicated endpoint
+   * Send color commands (0-100 for each channel)
    */
   async sendColor(fixtureIds: number[], r: number, g: number, b: number): Promise<void> {
     if (!this.connected) {
@@ -143,15 +118,22 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/fixtures/color`, {
+      const body: any = {
+        r: Math.round((r / 255) * 100),
+        g: Math.round((g / 255) * 100),
+        b: Math.round((b / 255) * 100)
+      };
+      
+      if (fixtureIds.length === 1) {
+        body.fixture = fixtureIds[0];
+      } else {
+        body.fixtures = fixtureIds;
+      }
+
+      const response = await fetch(`${this.baseUrl}/color`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fixtures: fixtureIds,
-          r: Math.round((r / 255) * 100),
-          g: Math.round((g / 255) * 100),
-          b: Math.round((b / 255) * 100)
-        })
+        body: JSON.stringify(body)
       });
 
       const result = await response.json();
@@ -166,136 +148,24 @@ export class GrandMA2ApiClient {
   }
 
   /**
-   * Send gobo command using raw command
+   * Send gobo command (deprecated - not supported by new API)
    */
   async sendGobo(fixtureIds: number[], gobo: number): Promise<void> {
-    if (!this.connected) {
-      this.log('Not connected - skipping command');
-      return;
-    }
-
-    try {
-      const fixtureList = this.formatFixtureList(fixtureIds);
-      const command = `Fixture ${fixtureList} Attribute "Gobo" At ${gobo}`;
-      
-      await this.sendRawCommand(command);
-      this.log(`Gobo sent for fixtures ${fixtureIds.join(',')}: ${gobo}`);
-    } catch (error) {
-      this.log(`Gobo error: ${error}`);
-    }
+    this.log(`Gobo command not supported by current API version`);
   }
 
   /**
-   * Send iris command using dedicated endpoint
+   * Send iris command (deprecated - not supported by new API)
    */
   async sendIris(fixtureIds: number[], iris: number): Promise<void> {
-    if (!this.connected) {
-      this.log('Not connected - skipping command');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${this.baseUrl}/fixtures/iris`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fixtures: fixtureIds,
-          iris: iris
-        })
-      });
-
-      const result = await response.json();
-      if (result.ok) {
-        this.log(`Iris sent for fixtures ${fixtureIds.join(',')}: ${iris}%`);
-      } else {
-        throw new Error('Iris command failed');
-      }
-    } catch (error) {
-      this.log(`Iris error: ${error}`);
-    }
+    this.log(`Iris command not supported by current API version`);
   }
 
   /**
-   * Send focus command using dedicated endpoint
+   * Send focus command (deprecated - not supported by new API)
    */
   async sendFocus(fixtureIds: number[], focus: number): Promise<void> {
-    if (!this.connected) {
-      this.log('Not connected - skipping command');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${this.baseUrl}/fixtures/focus`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fixtures: fixtureIds,
-          focus: focus
-        })
-      });
-
-      const result = await response.json();
-      if (result.ok) {
-        this.log(`Focus sent for fixtures ${fixtureIds.join(',')}: ${focus}%`);
-      } else {
-        throw new Error('Focus command failed');
-      }
-    } catch (error) {
-      this.log(`Focus error: ${error}`);
-    }
-  }
-
-  /**
-   * Send raw command to GrandMA2
-   */
-  async sendRawCommand(command: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/command`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command })
-    });
-
-    const result = await response.json();
-    if (!result.ok) {
-      throw new Error('Raw command failed');
-    }
-  }
-
-  /**
-   * Format fixture list for GrandMA2 commands
-   */
-  private formatFixtureList(fixtureIds: number[]): string {
-    if (fixtureIds.length === 1) {
-      return fixtureIds[0].toString();
-    }
-    
-    // Check for consecutive ranges
-    const sorted = [...fixtureIds].sort((a, b) => a - b);
-    const ranges: string[] = [];
-    let start = sorted[0];
-    let end = sorted[0];
-
-    for (let i = 1; i < sorted.length; i++) {
-      if (sorted[i] === end + 1) {
-        end = sorted[i];
-      } else {
-        if (start === end) {
-          ranges.push(start.toString());
-        } else {
-          ranges.push(`${start} Thru ${end}`);
-        }
-        start = end = sorted[i];
-      }
-    }
-
-    // Add final range
-    if (start === end) {
-      ranges.push(start.toString());
-    } else {
-      ranges.push(`${start} Thru ${end}`);
-    }
-
-    return ranges.join(' + ');
+    this.log(`Focus command not supported by current API version`);
   }
 
   private log(message: string): void {
