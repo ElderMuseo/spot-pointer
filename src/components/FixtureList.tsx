@@ -163,7 +163,7 @@ export const FixtureList: React.FC = () => {
 
                   {/* Position Info */}
                   <div className="mt-2 text-xs text-muted-foreground">
-                    Position: {fixture.x}m, {fixture.y}m | Pan: {fixture.pan.toFixed(1)}° | Tilt: {fixture.tilt.toFixed(1)}°
+                    Position: {fixture.x.toFixed(1)}m, {fixture.y.toFixed(1)}m | Pan: {fixture.pan.toFixed(1)}° | Tilt: {fixture.tilt.toFixed(1)}°
                   </div>
                 </CardContent>
               </Card>
