@@ -91,6 +91,35 @@ export class GrandMA2ApiClient {
   }
 
   /**
+   * Send pan and tilt commands for multiple fixtures in a single request
+   * @param items - Array of {fixture, pan?, tilt?} objects
+   */
+  async sendPanTiltBatch(items: Array<{ fixture: number; pan?: number; tilt?: number }>): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/move/group`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        const fixtureIds = items.map(i => i.fixture).join(',');
+        this.log(`Batch Pan/Tilt sent for fixtures ${fixtureIds}`);
+      } else {
+        throw new Error('Batch command failed');
+      }
+    } catch (error) {
+      this.log(`Batch Pan/Tilt error: ${error}`);
+    }
+  }
+
+  /**
    * Send dimmer command for fixtures (0-100%)
    */
   async sendDimmer(fixtureIds: number[], dimmer: number): Promise<void> {

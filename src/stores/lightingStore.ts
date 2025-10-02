@@ -12,6 +12,7 @@ interface LightingStore extends LightingState {
   updateFixture: (id: number, updates: Partial<Fixture>) => void;
   setTargetPoint: (x: number, y: number) => void;
   aimFixtureAt: (fixtureId: number, x: number, y: number) => void;
+  aimMultipleFixturesAt: (fixtureIds: number[], x: number, y: number) => void;
   updateDimmer: (fixtureIds: number[], dimmer: number) => void;
   updateColor: (fixtureIds: number[], r: number, g: number, b: number) => void;
   updateGobo: (fixtureIds: number[], gobo: number) => void;
@@ -183,6 +184,37 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
       fixtures: state.fixtures.map(f => 
         f.id === fixtureId ? { ...f, pan, tilt, targetX: x, targetY: y } : f
       ),
+      targetPoint: { x, y }
+    }));
+  },
+
+  aimMultipleFixturesAt: (fixtureIds: number[], x: number, y: number) => {
+    const state = get();
+    
+    // Calculate pan/tilt for each fixture
+    const items = fixtureIds
+      .map(id => {
+        const fixture = state.fixtures.find(f => f.id === id);
+        if (!fixture) return null;
+        
+        const { pan, tilt } = calculatePanTilt(fixture, x, y, 0);
+        return { fixture: id, pan, tilt };
+      })
+      .filter(item => item !== null) as Array<{ fixture: number; pan: number; tilt: number }>;
+    
+    if (items.length === 0) return;
+    
+    // Send batch command to API if connected
+    if (state.apiClient) {
+      state.apiClient.sendPanTiltBatch(items);
+    }
+    
+    // Update local state
+    set(state => ({
+      fixtures: state.fixtures.map(f => {
+        const item = items.find(i => i.fixture === f.id);
+        return item ? { ...f, pan: item.pan, tilt: item.tilt, targetX: x, targetY: y } : f;
+      }),
       targetPoint: { x, y }
     }));
   },
