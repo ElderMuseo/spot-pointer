@@ -37,7 +37,12 @@ export const FixtureList: React.FC = () => {
   };
 
   const handleIndividualDimmer = (fixtureId: number, dimmer: number) => {
-    updateDimmer([fixtureId], dimmer);
+    // Si el fixture está en la selección y hay más de uno seleccionado, aplicar a todos
+    if (selectedFixtures.includes(fixtureId) && selectedFixtures.length > 1) {
+      updateDimmer(selectedFixtures, dimmer);
+    } else {
+      updateDimmer([fixtureId], dimmer);
+    }
   };
 
   const isAllSelected = selectedFixtures.length === fixtures.length;
