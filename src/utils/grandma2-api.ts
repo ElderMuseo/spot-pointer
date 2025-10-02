@@ -129,18 +129,12 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const body: any = { value: dimmer };
-      
-      if (fixtureIds.length === 1) {
-        body.fixture = fixtureIds[0];
-      } else {
-        body.fixtures = fixtureIds;
-      }
+      const items = fixtureIds.map(fixture => ({ fixture, value: dimmer }));
 
       const response = await fetch(`${this.baseUrl}/dim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({ items })
       });
 
       const result = await response.json();
@@ -164,22 +158,17 @@ export class GrandMA2ApiClient {
     }
 
     try {
-      const body: any = {
+      const items = fixtureIds.map(fixture => ({
+        fixture,
         r: Math.round((r / 255) * 100),
         g: Math.round((g / 255) * 100),
         b: Math.round((b / 255) * 100)
-      };
-      
-      if (fixtureIds.length === 1) {
-        body.fixture = fixtureIds[0];
-      } else {
-        body.fixtures = fixtureIds;
-      }
+      }));
 
       const response = await fetch(`${this.baseUrl}/color`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({ items })
       });
 
       const result = await response.json();
