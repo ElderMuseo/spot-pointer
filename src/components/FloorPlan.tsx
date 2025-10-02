@@ -15,6 +15,7 @@ export const FloorPlan: React.FC = () => {
     scale,
     selectFixture,
     aimFixtureAt,
+    aimMultipleFixturesAt,
     setTargetPoint
   } = useLightingStore();
 
@@ -47,9 +48,11 @@ export const FloorPlan: React.FC = () => {
 
     // Aim selected fixtures at clicked point
     if (selectedFixtures.length > 0) {
-      selectedFixtures.forEach(fixtureId => {
-        aimFixtureAt(fixtureId, realCoords.x, realCoords.y);
-      });
+      if (selectedFixtures.length === 1) {
+        aimFixtureAt(selectedFixtures[0], realCoords.x, realCoords.y);
+      } else {
+        aimMultipleFixturesAt(selectedFixtures, realCoords.x, realCoords.y);
+      }
     }
   };
 
