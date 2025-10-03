@@ -54,7 +54,7 @@ const computeLightPositionsX = () => {
 const lightXPositions = computeLightPositionsX();
 
 const defaultFixtures: Fixture[] = lightXPositions.map((x, index) => ({
-  id: index + 1,
+  id: lightXPositions.length - index, // Inverted order: 6, 5, 4, 3, 2, 1
   x,
   y: LIGHTS_Y,
   z: LIGHTS_Z,
