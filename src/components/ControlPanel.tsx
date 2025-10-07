@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
@@ -35,6 +35,22 @@ export const ControlPanel: React.FC = () => {
 
   const [tempApiUrl, setTempApiUrl] = useState(apiConfig.baseUrl);
 
+  // Local states for immediate visual feedback
+  const [localDimmer, setLocalDimmer] = useState(0);
+  const [localColor, setLocalColor] = useState({ r: 255, g: 255, b: 255 });
+  const [localIris, setLocalIris] = useState(50);
+  const [localFocus, setLocalFocus] = useState(50);
+  const [localZoom, setLocalZoom] = useState(50);
+  const [localFrost, setLocalFrost] = useState(0);
+
+  // Debounce timers
+  const dimmerTimer = useRef<NodeJS.Timeout | null>(null);
+  const colorTimer = useRef<NodeJS.Timeout | null>(null);
+  const irisTimer = useRef<NodeJS.Timeout | null>(null);
+  const focusTimer = useRef<NodeJS.Timeout | null>(null);
+  const zoomTimer = useRef<NodeJS.Timeout | null>(null);
+  const frostTimer = useRef<NodeJS.Timeout | null>(null);
+
   const selectedFixtureData = fixtures.filter(f => selectedFixtures.includes(f.id));
   const hasSelection = selectedFixtures.length > 0;
 
@@ -47,16 +63,34 @@ export const ControlPanel: React.FC = () => {
   const commonZoom = hasSelection ? selectedFixtureData[0]?.zoom : 50;
   const commonFrost = hasSelection ? selectedFixtureData[0]?.frost : 0;
 
+  // Update local states when selection changes
+  React.useEffect(() => {
+    setLocalDimmer(commonDimmer);
+    setLocalColor(commonColor);
+    setLocalIris(commonIris);
+    setLocalFocus(commonFocus);
+    setLocalZoom(commonZoom);
+    setLocalFrost(commonFrost);
+  }, [selectedFixtures, commonDimmer, commonColor, commonIris, commonFocus, commonZoom, commonFrost]);
+
   const handleDimmerChange = (value: number[]) => {
     if (hasSelection) {
-      updateDimmer(selectedFixtures, value[0]);
+      setLocalDimmer(value[0]);
+      if (dimmerTimer.current) clearTimeout(dimmerTimer.current);
+      dimmerTimer.current = setTimeout(() => {
+        updateDimmer(selectedFixtures, value[0]);
+      }, 300);
     }
   };
 
   const handleColorChange = (component: 'r' | 'g' | 'b', value: number[]) => {
     if (hasSelection) {
-      const newColor = { ...commonColor, [component]: value[0] };
-      updateColor(selectedFixtures, newColor.r, newColor.g, newColor.b);
+      const newColor = { ...localColor, [component]: value[0] };
+      setLocalColor(newColor);
+      if (colorTimer.current) clearTimeout(colorTimer.current);
+      colorTimer.current = setTimeout(() => {
+        updateColor(selectedFixtures, newColor.r, newColor.g, newColor.b);
+      }, 300);
     }
   };
 
@@ -68,25 +102,41 @@ export const ControlPanel: React.FC = () => {
 
   const handleIrisChange = (value: number[]) => {
     if (hasSelection) {
-      updateIris(selectedFixtures, value[0]);
+      setLocalIris(value[0]);
+      if (irisTimer.current) clearTimeout(irisTimer.current);
+      irisTimer.current = setTimeout(() => {
+        updateIris(selectedFixtures, value[0]);
+      }, 300);
     }
   };
 
   const handleFocusChange = (value: number[]) => {
     if (hasSelection) {
-      updateFocus(selectedFixtures, value[0]);
+      setLocalFocus(value[0]);
+      if (focusTimer.current) clearTimeout(focusTimer.current);
+      focusTimer.current = setTimeout(() => {
+        updateFocus(selectedFixtures, value[0]);
+      }, 300);
     }
   };
 
   const handleZoomChange = (value: number[]) => {
     if (hasSelection) {
-      updateZoom(selectedFixtures, value[0]);
+      setLocalZoom(value[0]);
+      if (zoomTimer.current) clearTimeout(zoomTimer.current);
+      zoomTimer.current = setTimeout(() => {
+        updateZoom(selectedFixtures, value[0]);
+      }, 300);
     }
   };
 
   const handleFrostChange = (value: number[]) => {
     if (hasSelection) {
-      updateFrost(selectedFixtures, value[0]);
+      setLocalFrost(value[0]);
+      if (frostTimer.current) clearTimeout(frostTimer.current);
+      frostTimer.current = setTimeout(() => {
+        updateFrost(selectedFixtures, value[0]);
+      }, 300);
     }
   };
 
@@ -167,7 +217,7 @@ export const ControlPanel: React.FC = () => {
               <Label className="text-sm font-medium">Dimmer</Label>
               <div className="flex items-center space-x-3">
                 <Slider
-                  value={[commonDimmer]}
+                  value={[localDimmer]}
                   onValueChange={handleDimmerChange}
                   max={100}
                   step={1}
@@ -175,7 +225,7 @@ export const ControlPanel: React.FC = () => {
                   disabled={!hasSelection}
                 />
                 <span className="text-sm font-mono w-12 text-right">
-                  {commonDimmer}%
+                  {localDimmer}%
                 </span>
               </div>
             </div>
@@ -205,7 +255,7 @@ export const ControlPanel: React.FC = () => {
               <Label className="text-sm font-medium">Iris Opening</Label>
               <div className="flex items-center space-x-3">
                 <Slider
-                  value={[commonIris]}
+                  value={[localIris]}
                   onValueChange={handleIrisChange}
                   max={100}
                   step={1}
@@ -213,7 +263,7 @@ export const ControlPanel: React.FC = () => {
                   disabled={!hasSelection}
                 />
                 <span className="text-sm font-mono w-12 text-right">
-                  {commonIris}%
+                  {localIris}%
                 </span>
               </div>
             </div>
@@ -223,7 +273,7 @@ export const ControlPanel: React.FC = () => {
               <Label className="text-sm font-medium">Focus</Label>
               <div className="flex items-center space-x-3">
                 <Slider
-                  value={[commonFocus]}
+                  value={[localFocus]}
                   onValueChange={handleFocusChange}
                   max={100}
                   step={1}
@@ -231,7 +281,7 @@ export const ControlPanel: React.FC = () => {
                   disabled={!hasSelection}
                 />
                 <span className="text-sm font-mono w-12 text-right">
-                  {commonFocus}%
+                  {localFocus}%
                 </span>
               </div>
             </div>
@@ -241,7 +291,7 @@ export const ControlPanel: React.FC = () => {
               <Label className="text-sm font-medium">Zoom</Label>
               <div className="flex items-center space-x-3">
                 <Slider
-                  value={[commonZoom]}
+                  value={[localZoom]}
                   onValueChange={handleZoomChange}
                   max={100}
                   step={1}
@@ -249,7 +299,7 @@ export const ControlPanel: React.FC = () => {
                   disabled={!hasSelection}
                 />
                 <span className="text-sm font-mono w-12 text-right">
-                  {commonZoom}%
+                  {localZoom}%
                 </span>
               </div>
             </div>
@@ -259,7 +309,7 @@ export const ControlPanel: React.FC = () => {
               <Label className="text-sm font-medium">Frost / Diffusion</Label>
               <div className="flex items-center space-x-3">
                 <Slider
-                  value={[commonFrost]}
+                  value={[localFrost]}
                   onValueChange={handleFrostChange}
                   max={100}
                   step={1}
@@ -267,7 +317,7 @@ export const ControlPanel: React.FC = () => {
                   disabled={!hasSelection}
                 />
                 <span className="text-sm font-mono w-12 text-right">
-                  {commonFrost}%
+                  {localFrost}%
                 </span>
               </div>
             </div>
@@ -303,7 +353,7 @@ export const ControlPanel: React.FC = () => {
                 <Label className="text-sm font-medium text-red-400">Red</Label>
                 <div className="flex items-center space-x-3">
                   <Slider
-                    value={[commonColor.r]}
+                    value={[localColor.r]}
                     onValueChange={(value) => handleColorChange('r', value)}
                     max={255}
                     step={1}
@@ -311,7 +361,7 @@ export const ControlPanel: React.FC = () => {
                     disabled={!hasSelection}
                   />
                   <span className="text-sm font-mono w-12 text-right">
-                    {commonColor.r}
+                    {localColor.r}
                   </span>
                 </div>
               </div>
@@ -320,7 +370,7 @@ export const ControlPanel: React.FC = () => {
                 <Label className="text-sm font-medium text-green-400">Green</Label>
                 <div className="flex items-center space-x-3">
                   <Slider
-                    value={[commonColor.g]}
+                    value={[localColor.g]}
                     onValueChange={(value) => handleColorChange('g', value)}
                     max={255}
                     step={1}
@@ -328,7 +378,7 @@ export const ControlPanel: React.FC = () => {
                     disabled={!hasSelection}
                   />
                   <span className="text-sm font-mono w-12 text-right">
-                    {commonColor.g}
+                    {localColor.g}
                   </span>
                 </div>
               </div>
@@ -337,7 +387,7 @@ export const ControlPanel: React.FC = () => {
                 <Label className="text-sm font-medium text-blue-400">Blue</Label>
                 <div className="flex items-center space-x-3">
                   <Slider
-                    value={[commonColor.b]}
+                    value={[localColor.b]}
                     onValueChange={(value) => handleColorChange('b', value)}
                     max={255}
                     step={1}
@@ -345,7 +395,7 @@ export const ControlPanel: React.FC = () => {
                     disabled={!hasSelection}
                   />
                   <span className="text-sm font-mono w-12 text-right">
-                    {commonColor.b}
+                    {localColor.b}
                   </span>
                 </div>
               </div>
@@ -356,7 +406,7 @@ export const ControlPanel: React.FC = () => {
                 <div 
                   className="w-full h-12 rounded border border-border"
                   style={{ 
-                    backgroundColor: `rgb(${commonColor.r}, ${commonColor.g}, ${commonColor.b})` 
+                    backgroundColor: `rgb(${localColor.r}, ${localColor.g}, ${localColor.b})` 
                   }}
                 />
               </div>

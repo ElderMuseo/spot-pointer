@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -14,6 +14,8 @@ export const FixtureList: React.FC = () => {
     updateDimmer,
     updateColor
   } = useLightingStore();
+
+  const dimmerTimers = useRef<Map<number, NodeJS.Timeout>>(new Map());
 
   const handleSelectAll = () => {
     // If all are selected, deselect all. Otherwise select all.
@@ -37,12 +39,23 @@ export const FixtureList: React.FC = () => {
   };
 
   const handleIndividualDimmer = (fixtureId: number, dimmer: number) => {
-    // Si el fixture está en la selección y hay más de uno seleccionado, aplicar a todos
-    if (selectedFixtures.includes(fixtureId) && selectedFixtures.length > 1) {
-      updateDimmer(selectedFixtures, dimmer);
-    } else {
-      updateDimmer([fixtureId], dimmer);
+    // Clear existing timer for this fixture
+    const existingTimer = dimmerTimers.current.get(fixtureId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
     }
+
+    // Set new timer
+    const timer = setTimeout(() => {
+      if (selectedFixtures.includes(fixtureId) && selectedFixtures.length > 1) {
+        updateDimmer(selectedFixtures, dimmer);
+      } else {
+        updateDimmer([fixtureId], dimmer);
+      }
+      dimmerTimers.current.delete(fixtureId);
+    }, 300);
+
+    dimmerTimers.current.set(fixtureId, timer);
   };
 
   const isAllSelected = selectedFixtures.length === fixtures.length;
