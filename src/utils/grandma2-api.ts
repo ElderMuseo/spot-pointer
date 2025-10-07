@@ -190,17 +190,119 @@ export class GrandMA2ApiClient {
   }
 
   /**
-   * Send iris command (deprecated - not supported by new API)
+   * Send iris command (0-100%)
    */
   async sendIris(fixtureIds: number[], iris: number): Promise<void> {
-    this.log(`Iris command not supported by current API version`);
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const items = fixtureIds.map(fixture => ({ fixture, value: iris }));
+
+      const response = await fetch(`${this.baseUrl}/iris`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Iris sent for fixtures ${fixtureIds.join(',')}: ${iris}%`);
+      } else {
+        throw new Error('Iris command failed');
+      }
+    } catch (error) {
+      this.log(`Iris error: ${error}`);
+    }
   }
 
   /**
-   * Send focus command (deprecated - not supported by new API)
+   * Send focus command (0-100%)
    */
   async sendFocus(fixtureIds: number[], focus: number): Promise<void> {
-    this.log(`Focus command not supported by current API version`);
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const items = fixtureIds.map(fixture => ({ fixture, value: focus }));
+
+      const response = await fetch(`${this.baseUrl}/focus`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Focus sent for fixtures ${fixtureIds.join(',')}: ${focus}%`);
+      } else {
+        throw new Error('Focus command failed');
+      }
+    } catch (error) {
+      this.log(`Focus error: ${error}`);
+    }
+  }
+
+  /**
+   * Send zoom command (0-100%)
+   */
+  async sendZoom(fixtureIds: number[], zoom: number): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const items = fixtureIds.map(fixture => ({ fixture, value: zoom }));
+
+      const response = await fetch(`${this.baseUrl}/zoom`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Zoom sent for fixtures ${fixtureIds.join(',')}: ${zoom}%`);
+      } else {
+        throw new Error('Zoom command failed');
+      }
+    } catch (error) {
+      this.log(`Zoom error: ${error}`);
+    }
+  }
+
+  /**
+   * Send frost command (0-100%)
+   */
+  async sendFrost(fixtureIds: number[], frost: number): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const items = fixtureIds.map(fixture => ({ fixture, value: frost }));
+
+      const response = await fetch(`${this.baseUrl}/frost`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Frost sent for fixtures ${fixtureIds.join(',')}: ${frost}%`);
+      } else {
+        throw new Error('Frost command failed');
+      }
+    } catch (error) {
+      this.log(`Frost error: ${error}`);
+    }
   }
 
   private log(message: string): void {

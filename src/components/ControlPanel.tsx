@@ -23,6 +23,8 @@ export const ControlPanel: React.FC = () => {
     updateGobo,
     updateIris,
     updateFocus,
+    updateZoom,
+    updateFrost,
     updateApiConfig,
     initializeApi,
     updateFixtureHeight,
@@ -42,6 +44,8 @@ export const ControlPanel: React.FC = () => {
   const commonGobo = hasSelection ? selectedFixtureData[0]?.gobo : 0;
   const commonIris = hasSelection ? selectedFixtureData[0]?.iris : 50;
   const commonFocus = hasSelection ? selectedFixtureData[0]?.focus : 50;
+  const commonZoom = hasSelection ? selectedFixtureData[0]?.zoom : 50;
+  const commonFrost = hasSelection ? selectedFixtureData[0]?.frost : 0;
 
   const handleDimmerChange = (value: number[]) => {
     if (hasSelection) {
@@ -71,6 +75,18 @@ export const ControlPanel: React.FC = () => {
   const handleFocusChange = (value: number[]) => {
     if (hasSelection) {
       updateFocus(selectedFixtures, value[0]);
+    }
+  };
+
+  const handleZoomChange = (value: number[]) => {
+    if (hasSelection) {
+      updateZoom(selectedFixtures, value[0]);
+    }
+  };
+
+  const handleFrostChange = (value: number[]) => {
+    if (hasSelection) {
+      updateFrost(selectedFixtures, value[0]);
     }
   };
 
@@ -216,6 +232,42 @@ export const ControlPanel: React.FC = () => {
                 />
                 <span className="text-sm font-mono w-12 text-right">
                   {commonFocus}%
+                </span>
+              </div>
+            </div>
+
+            {/* Zoom Control */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Zoom</Label>
+              <div className="flex items-center space-x-3">
+                <Slider
+                  value={[commonZoom]}
+                  onValueChange={handleZoomChange}
+                  max={100}
+                  step={1}
+                  className="flex-1"
+                  disabled={!hasSelection}
+                />
+                <span className="text-sm font-mono w-12 text-right">
+                  {commonZoom}%
+                </span>
+              </div>
+            </div>
+
+            {/* Frost Control */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Frost / Diffusion</Label>
+              <div className="flex items-center space-x-3">
+                <Slider
+                  value={[commonFrost]}
+                  onValueChange={handleFrostChange}
+                  max={100}
+                  step={1}
+                  className="flex-1"
+                  disabled={!hasSelection}
+                />
+                <span className="text-sm font-mono w-12 text-right">
+                  {commonFrost}%
                 </span>
               </div>
             </div>

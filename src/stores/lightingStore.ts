@@ -18,6 +18,8 @@ interface LightingStore extends LightingState {
   updateGobo: (fixtureIds: number[], gobo: number) => void;
   updateIris: (fixtureIds: number[], iris: number) => void;
   updateFocus: (fixtureIds: number[], focus: number) => void;
+  updateZoom: (fixtureIds: number[], zoom: number) => void;
+  updateFrost: (fixtureIds: number[], frost: number) => void;
   savePreset: (name: string, description: string) => void;
   loadPreset: (presetId: string) => void;
   deletePreset: (presetId: string) => void;
@@ -63,9 +65,10 @@ const defaultFixtures: Fixture[] = lightXPositions.map((x, index) => ({
   dimmer: 0,
   color: { r: 255, g: 255, b: 255 },
   gobo: 0,
-  zoom: 15,
+  zoom: 50,
   iris: 50,
   focus: 50,
+  frost: 0,
   isSelected: false,
   targetX: x,
   targetY: ROOM_LENGTH_Y / 2, // Default target at room center
@@ -280,6 +283,32 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     set(state => ({
       fixtures: state.fixtures.map(f => 
         fixtureIds.includes(f.id) ? { ...f, focus } : f
+      )
+    }));
+  },
+
+  updateZoom: (fixtureIds, zoom) => {
+    // Send zoom command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendZoom(fixtureIds, zoom);
+    }
+    
+    set(state => ({
+      fixtures: state.fixtures.map(f => 
+        fixtureIds.includes(f.id) ? { ...f, zoom } : f
+      )
+    }));
+  },
+
+  updateFrost: (fixtureIds, frost) => {
+    // Send frost command to API if connected
+    if (get().apiClient) {
+      get().apiClient.sendFrost(fixtureIds, frost);
+    }
+    
+    set(state => ({
+      fixtures: state.fixtures.map(f => 
+        fixtureIds.includes(f.id) ? { ...f, frost } : f
       )
     }));
   },
