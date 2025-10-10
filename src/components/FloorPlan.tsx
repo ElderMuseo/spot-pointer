@@ -304,8 +304,8 @@ export const FloorPlan: React.FC = () => {
 
   return (
     <div className="relative inline-flex bg-card rounded-lg border border-border items-center justify-center" style={{ 
-      width: canvasSize.width, 
-      height: canvasSize.height 
+      width: canvasSize.height, 
+      height: canvasSize.width 
     }}>
       <canvas
         ref={canvasRef}
