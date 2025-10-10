@@ -303,7 +303,10 @@ export const FloorPlan: React.FC = () => {
   }, [fixtures, floorPlan, selectedFixtures, targetPoint, canvasSize]);
 
   return (
-    <div className="relative w-full h-full bg-card rounded-lg border border-border flex items-center justify-center">
+    <div className="relative inline-flex bg-card rounded-lg border border-border items-center justify-center" style={{ 
+      width: canvasSize.width, 
+      height: canvasSize.height 
+    }}>
       <canvas
         ref={canvasRef}
         width={canvasSize.height}
