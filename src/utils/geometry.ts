@@ -122,7 +122,6 @@ export function calculateLightCone(
 
 /**
  * Convert pixel coordinates to real world coordinates
- * With 90° rotation: canvas coordinates are rotated but real coordinates stay the same
  * Bottom-left origin: (0,0) at bottom-left, x goes right, y goes up
  */
 export function pixelToReal(
@@ -130,17 +129,15 @@ export function pixelToReal(
   pixelY: number,
   floorPlan: { width: number; height: number; pixelsPerMeter: number }
 ): { x: number; y: number } {
-  // After 90° rotation: pixelX maps to Y, pixelY maps to X
-  const canvasWidth = floorPlan.height * floorPlan.pixelsPerMeter;
+  const canvasHeight = floorPlan.height * floorPlan.pixelsPerMeter;
   return {
-    x: pixelY / floorPlan.pixelsPerMeter,
-    y: (canvasWidth - pixelX) / floorPlan.pixelsPerMeter
+    x: pixelX / floorPlan.pixelsPerMeter,
+    y: (canvasHeight - pixelY) / floorPlan.pixelsPerMeter
   };
 }
 
 /**
- * Convert real world coordinates to pixel coordinates
- * With 90° rotation: real X maps to pixelY, real Y maps to pixelX
+ * Convert real world coordinates to pixel coordinates  
  * Bottom-left origin: (0,0) at bottom-left, x goes right, y goes up
  */
 export function realToPixel(
@@ -148,10 +145,9 @@ export function realToPixel(
   realY: number,
   floorPlan: { width: number; height: number; pixelsPerMeter: number }
 ): { x: number; y: number } {
-  // After 90° rotation: realX maps to pixelY, realY maps to pixelX
-  const canvasWidth = floorPlan.height * floorPlan.pixelsPerMeter;
+  const canvasHeight = floorPlan.height * floorPlan.pixelsPerMeter;
   return {
-    x: canvasWidth - (realY * floorPlan.pixelsPerMeter),
-    y: realX * floorPlan.pixelsPerMeter
+    x: realX * floorPlan.pixelsPerMeter,
+    y: canvasHeight - (realY * floorPlan.pixelsPerMeter)
   };
 }

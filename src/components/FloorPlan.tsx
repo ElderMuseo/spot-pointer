@@ -19,23 +19,24 @@ export const FloorPlan: React.FC = () => {
     setTargetPoint
   } = useLightingStore();
 
-  // Handle canvas click
+  // Handle canvas click (accounting for 90° rotation)
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
     
-    // Get click position relative to canvas display size
+    // Get click position relative to rotated canvas display
     const clickX = event.clientX - rect.left;
     const clickY = event.clientY - rect.top;
     
-    // Convert to canvas coordinates (accounting for any CSS scaling)
-    const canvasX = (clickX / rect.width) * canvasSize.width;
-    const canvasY = (clickY / rect.height) * canvasSize.height;
+    // Convert to pre-rotation canvas coordinates
+    // After 90° clockwise rotation: displayX maps to canvasY, displayY maps to (width - canvasX)
+    const canvasX = canvasSize.width - ((clickY / rect.height) * canvasSize.height);
+    const canvasY = (clickX / rect.width) * canvasSize.width;
     
-    // Calculate pixels per meter based on current canvas size (after rotation)
-    const pixelsPerMeter = canvasSize.width / floorPlan.height;
+    // Calculate pixels per meter
+    const pixelsPerMeter = canvasSize.width / floorPlan.width;
     
     // Convert pixel coordinates to real world coordinates
     const realCoords = pixelToReal(canvasX, canvasY, {
@@ -72,8 +73,8 @@ export const FloorPlan: React.FC = () => {
         const containerHeight = rect.height - 16; // Reduced padding
         
         // Fixed floor plan dimensions: 20.67m × 36.7m
-        // After 90° rotation: display as 36.7m × 20.67m (horizontal layout)
-        const roomAspectRatio = 36.7 / 20.67; // Inverted for horizontal display
+        // Canvas internal dimensions stay the same, rotation is visual only
+        const roomAspectRatio = 20.67 / 36.7;
         const containerAspectRatio = containerWidth / containerHeight;
         
         let canvasWidth, canvasHeight;
@@ -109,8 +110,8 @@ export const FloorPlan: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // After rotation, width maps to height and vice versa
-    const pixelsPerMeter = canvasSize.width / floorPlan.height;
+    // Canvas dimensions match floor plan (rotation is only visual)
+    const pixelsPerMeter = canvasSize.width / floorPlan.width;
 
     // Clear canvas
     ctx.fillStyle = 'hsl(220, 15%, 8%)';
@@ -309,8 +310,8 @@ export const FloorPlan: React.FC = () => {
     }}>
       <canvas
         ref={canvasRef}
-        width={canvasSize.height}
-        height={canvasSize.width}
+        width={canvasSize.width}
+        height={canvasSize.height}
         className="cursor-crosshair"
         onClick={handleCanvasClick}
         style={{ 
@@ -325,20 +326,24 @@ export const FloorPlan: React.FC = () => {
       
       {/* Fixture click handlers */}
       {fixtures.map(fixture => {
-        const pixelsPerMeter = canvasSize.width / floorPlan.height;
+        const pixelsPerMeter = canvasSize.width / floorPlan.width;
         const pixel = realToPixel(fixture.x, fixture.y, {
           width: floorPlan.width,
           height: floorPlan.height,
           pixelsPerMeter
         });
         
+        // Adjust position for 90° rotation: x->y, y->(width-x)
+        const rotatedLeft = pixel.y;
+        const rotatedTop = canvasSize.width - pixel.x;
+        
         return (
           <div
             key={fixture.id}
             className="absolute cursor-pointer"
             style={{
-              left: pixel.x - 20,
-              top: pixel.y - 20,
+              left: rotatedLeft - 20,
+              top: rotatedTop - 20,
               width: 40,
               height: 40,
             }}
