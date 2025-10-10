@@ -34,8 +34,8 @@ export const FloorPlan: React.FC = () => {
     const canvasX = (clickX / rect.width) * canvasSize.width;
     const canvasY = (clickY / rect.height) * canvasSize.height;
     
-    // Calculate pixels per meter based on current canvas size
-    const pixelsPerMeter = canvasSize.width / floorPlan.width;
+    // Calculate pixels per meter based on current canvas size (after rotation)
+    const pixelsPerMeter = canvasSize.width / floorPlan.height;
     
     // Convert pixel coordinates to real world coordinates
     const realCoords = pixelToReal(canvasX, canvasY, {
@@ -71,8 +71,9 @@ export const FloorPlan: React.FC = () => {
         const containerWidth = rect.width - 16; // Reduced padding
         const containerHeight = rect.height - 16; // Reduced padding
         
-        // Fixed floor plan dimensions: 20.67m × 36.7m (aspect ratio ≈ 0.563)
-        const roomAspectRatio = 20.67 / 36.7;
+        // Fixed floor plan dimensions: 20.67m × 36.7m
+        // After 90° rotation: display as 36.7m × 20.67m (horizontal layout)
+        const roomAspectRatio = 36.7 / 20.67; // Inverted for horizontal display
         const containerAspectRatio = containerWidth / containerHeight;
         
         let canvasWidth, canvasHeight;
@@ -108,7 +109,8 @@ export const FloorPlan: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const pixelsPerMeter = canvasSize.width / floorPlan.width;
+    // After rotation, width maps to height and vice versa
+    const pixelsPerMeter = canvasSize.width / floorPlan.height;
 
     // Clear canvas
     ctx.fillStyle = 'hsl(220, 15%, 8%)';
@@ -304,21 +306,23 @@ export const FloorPlan: React.FC = () => {
     <div className="relative w-full h-full bg-card rounded-lg border border-border overflow-hidden flex items-center justify-center">
       <canvas
         ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
+        width={canvasSize.height}
+        height={canvasSize.width}
         className="cursor-crosshair"
         onClick={handleCanvasClick}
         style={{ 
           imageRendering: 'crisp-edges',
           maxWidth: '100%',
           maxHeight: '100%',
-          objectFit: 'contain'
+          objectFit: 'contain',
+          transform: 'rotate(90deg)',
+          transformOrigin: 'center'
         }}
       />
       
       {/* Fixture click handlers */}
       {fixtures.map(fixture => {
-        const pixelsPerMeter = canvasSize.width / floorPlan.width;
+        const pixelsPerMeter = canvasSize.width / floorPlan.height;
         const pixel = realToPixel(fixture.x, fixture.y, {
           width: floorPlan.width,
           height: floorPlan.height,
