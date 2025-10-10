@@ -345,13 +345,13 @@ export const FloorPlan: React.FC = () => {
       })}
       
       {/* Grid coordinates overlay */}
-      <div className="absolute top-4 left-4 text-sm text-muted-foreground bg-background/80 px-3 py-2 rounded">
-        <div className="font-medium">{floorPlan.width}m × {floorPlan.height}m</div>
+      <div className="absolute top-4 left-4 text-sm text-muted-foreground bg-background/90 backdrop-blur-sm px-4 py-2.5 rounded-lg shadow-lg border border-border/50 min-w-fit whitespace-nowrap">
+        <div className="font-semibold text-foreground mb-1">{floorPlan.width}m × {floorPlan.height}m</div>
         {targetPoint && (
-          <div className="text-xs">Target: {targetPoint.x.toFixed(1)}m, {targetPoint.y.toFixed(1)}m</div>
+          <div className="text-xs leading-relaxed">Target: {targetPoint.x.toFixed(1)}m, {targetPoint.y.toFixed(1)}m</div>
         )}
         {selectedFixtures.length > 0 && (
-          <div className="text-xs text-primary">
+          <div className="text-xs text-primary leading-relaxed mt-0.5">
             Selected: {selectedFixtures.join(', ')}
           </div>
         )}
