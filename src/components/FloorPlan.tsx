@@ -304,7 +304,7 @@ export const FloorPlan: React.FC = () => {
   }, [fixtures, floorPlan, selectedFixtures, targetPoint, canvasSize]);
 
   return (
-    <div className="relative flex bg-card rounded-lg border border-border items-center justify-center w-full h-full" style={{ 
+    <div className="relative flex bg-card rounded-lg border border-border items-center justify-center w-full" style={{ 
       aspectRatio: `${canvasSize.width} / ${canvasSize.height}`
     }}>
       <canvas
