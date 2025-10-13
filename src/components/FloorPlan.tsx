@@ -31,9 +31,9 @@ export const FloorPlan: React.FC = () => {
     const clickY = event.clientY - rect.top;
     
     // Convert to pre-rotation canvas coordinates
-    // After 90° clockwise rotation: displayX maps to canvasY, displayY maps to (width - canvasX)
-    const canvasX = canvasSize.width - ((clickY / rect.height) * canvasSize.height);
-    const canvasY = (clickX / rect.width) * canvasSize.width;
+    // After 90° clockwise rotation: visual X becomes canvas Y, visual Y becomes inverted canvas X
+    const canvasY = (clickX / rect.width) * canvasSize.height;
+    const canvasX = canvasSize.width - (clickY / rect.height) * canvasSize.width;
     
     // Calculate pixels per meter
     const pixelsPerMeter = canvasSize.width / floorPlan.width;
