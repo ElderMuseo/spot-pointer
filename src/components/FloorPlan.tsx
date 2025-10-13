@@ -125,8 +125,15 @@ export const FloorPlan: React.FC = () => {
     if (floorPlan.image) {
       const img = new Image();
       img.onload = () => {
+        ctx.save();
         ctx.globalAlpha = 0.7;
-        ctx.drawImage(img, 0, 0, canvasSize.width, canvasSize.height);
+        
+        // Rotate image 90° clockwise to match canvas rotation
+        ctx.translate(canvasSize.width / 2, canvasSize.height / 2);
+        ctx.rotate(90 * Math.PI / 180);
+        ctx.drawImage(img, -canvasSize.height / 2, -canvasSize.width / 2, canvasSize.height, canvasSize.width);
+        
+        ctx.restore();
         ctx.globalAlpha = 1;
         drawOverlay();
       };
