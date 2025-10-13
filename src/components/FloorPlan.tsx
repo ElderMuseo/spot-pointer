@@ -305,7 +305,7 @@ export const FloorPlan: React.FC = () => {
 
   return (
     <div className="relative flex bg-card rounded-lg border border-border items-center justify-center w-full h-full" style={{ 
-      aspectRatio: `${canvasSize.height} / ${canvasSize.width}`
+      aspectRatio: `${canvasSize.width} / ${canvasSize.height}`
     }}>
       <canvas
         ref={canvasRef}
