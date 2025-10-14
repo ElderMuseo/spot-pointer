@@ -80,7 +80,7 @@ const Index = () => {
       {/* Main Content - Horizontal layout */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Floor Plan - Takes most of the screen */}
-        <div className="flex-1 overflow-hidden p-4">
+        <div className="flex-[0.8] overflow-hidden p-4">
           <FloorPlan />
         </div>
         
