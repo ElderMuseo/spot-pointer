@@ -128,9 +128,9 @@ export const FloorPlan: React.FC = () => {
         ctx.save();
         ctx.globalAlpha = 0.7;
         
-        // Rotate image 90° clockwise to match canvas rotation
+        // Rotate image 90° counter-clockwise to match canvas rotation
         ctx.translate(canvasSize.width / 2, canvasSize.height / 2);
-        ctx.rotate(90 * Math.PI / 180);
+        ctx.rotate(-90 * Math.PI / 180);
         ctx.drawImage(img, -canvasSize.height / 2, -canvasSize.width / 2, canvasSize.height, canvasSize.width);
         
         ctx.restore();
