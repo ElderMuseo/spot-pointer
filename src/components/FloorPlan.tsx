@@ -42,6 +42,31 @@ export const FloorPlan: React.FC = () => {
     // Calculate pixels per meter
     const pixelsPerMeter = canvasSize.width / floorPlan.width;
     
+    // Check if clicked on a fixture (20px radius)
+    let clickedFixture: number | null = null;
+    for (const fixture of fixtures) {
+      const pixel = realToPixel(fixture.x, fixture.y, {
+        width: floorPlan.width,
+        height: floorPlan.height,
+        pixelsPerMeter
+      });
+      
+      const distance = Math.sqrt(
+        Math.pow(canvasX - pixel.x, 2) + Math.pow(canvasY - pixel.y, 2)
+      );
+      
+      if (distance <= 20) {
+        clickedFixture = fixture.id;
+        break;
+      }
+    }
+    
+    // If clicked on a fixture, select it
+    if (clickedFixture !== null) {
+      selectFixture(clickedFixture, event.shiftKey);
+      return;
+    }
+    
     // Convert pixel coordinates to real world coordinates
     const realCoords = pixelToReal(canvasX, canvasY, {
       width: floorPlan.width,
@@ -61,11 +86,6 @@ export const FloorPlan: React.FC = () => {
     }
   };
 
-  // Handle fixture click
-  const handleFixtureClick = (fixtureId: number, event: React.MouseEvent) => {
-    event.stopPropagation();
-    selectFixture(fixtureId, event.shiftKey);
-  };
 
   // Update canvas size based on container
   useEffect(() => {
@@ -333,35 +353,6 @@ export const FloorPlan: React.FC = () => {
           transformOrigin: 'center'
         }}
       />
-      
-      {/* Fixture click handlers */}
-      {fixtures.map(fixture => {
-        const pixelsPerMeter = canvasSize.width / floorPlan.width;
-        const pixel = realToPixel(fixture.x, fixture.y, {
-          width: floorPlan.width,
-          height: floorPlan.height,
-          pixelsPerMeter
-        });
-        
-        // Adjust position for 90° clockwise rotation
-        // Canvas (x, y) → Visual position after rotation
-        const rotatedLeft = canvasSize.height - pixel.y;
-        const rotatedTop = pixel.x;
-        
-        return (
-          <div
-            key={fixture.id}
-            className="absolute cursor-pointer"
-            style={{
-              left: rotatedLeft - 20,
-              top: rotatedTop - 20,
-              width: 40,
-              height: 40,
-            }}
-            onClick={(e) => handleFixtureClick(fixture.id, e)}
-          />
-        );
-      })}
       
       {/* Grid coordinates overlay */}
       <div className="absolute top-4 left-4 text-sm text-muted-foreground bg-background/90 backdrop-blur-sm px-4 py-2.5 rounded-lg shadow-lg border border-border/50 min-w-fit whitespace-nowrap">
