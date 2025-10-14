@@ -355,7 +355,7 @@ export const FloorPlan: React.FC = () => {
       />
       
       {/* Grid coordinates overlay */}
-      <div className="absolute top-8 left-4 text-base text-muted-foreground bg-background/90 backdrop-blur-sm px-5 py-3 rounded-lg shadow-lg border border-border/50 min-w-fit whitespace-nowrap">
+      <div className="absolute bottom-4 left-4 text-base text-muted-foreground bg-background/90 backdrop-blur-sm px-5 py-3 rounded-lg shadow-lg border border-border/50 min-w-fit whitespace-nowrap">
         <div className="font-semibold text-foreground mb-1.5">{floorPlan.width}m × {floorPlan.height}m</div>
         {targetPoint && (
           <div className="text-sm leading-relaxed">Target: {targetPoint.x.toFixed(1)}m, {targetPoint.y.toFixed(1)}m</div>
