@@ -34,31 +34,26 @@ interface LightingStore extends LightingState {
   initializeApi: (baseUrl: string) => Promise<boolean>;
 }
 
-// Room parameters (matching Python code)
-const ROOM_WIDTH_X = 20.67;   // m
-const ROOM_LENGTH_Y = 36.70;  // m
-const LIGHTS_Y = 19.61;       // m (from bottom edge)
-const LIGHTS_Z = 8.45;        // m (height)
+// Room parameters - Updated dimensions
+const ROOM_WIDTH_X = 38;   // m (ancho)
+const ROOM_LENGTH_Y = 35;  // m (largo)
+const LIGHTS_Y = 15.51;    // m (from bottom edge)
+const LIGHTS_Z = 8.45;     // m (height)
 
-// Light X positions with gaps [2.0, 2.0, 3.0, 2.0, 2.0] centered in width
-const GAPS = [2.0, 2.0, 3.0, 2.0, 2.0];
-const computeLightPositionsX = () => {
-  const xCenter = ROOM_WIDTH_X / 2.0;
-  const totalSpan = GAPS.reduce((sum, gap) => sum + gap, 0); // 11m
-  const xLeft = xCenter - totalSpan / 2.0; // starting position
-  const positions = [xLeft];
-  for (const gap of GAPS) {
-    positions.push(positions[positions.length - 1] + gap);
-  }
-  return positions; // 6 positions
-};
+// Fixed fixture positions
+const fixturePositions = [
+  { id: 6, x: 15.8, y: 15.51 },
+  { id: 5, x: 17.43, y: 15.51 },
+  { id: 4, x: 19.06, y: 15.51 },
+  { id: 3, x: 21.06, y: 15.51 },
+  { id: 2, x: 22.69, y: 15.51 },
+  { id: 1, x: 24.32, y: 15.51 }
+];
 
-const lightXPositions = computeLightPositionsX();
-
-const defaultFixtures: Fixture[] = lightXPositions.map((x, index) => ({
-  id: lightXPositions.length - index, // Inverted order: 6, 5, 4, 3, 2, 1
-  x,
-  y: LIGHTS_Y,
+const defaultFixtures: Fixture[] = fixturePositions.map(pos => ({
+  id: pos.id,
+  x: pos.x,
+  y: pos.y,
   z: LIGHTS_Z,
   pan: 0,
   tilt: 0,
@@ -70,7 +65,7 @@ const defaultFixtures: Fixture[] = lightXPositions.map((x, index) => ({
   focus: 50,
   frost: 0,
   isSelected: false,
-  targetX: x,
+  targetX: pos.x,
   targetY: ROOM_LENGTH_Y / 2, // Default target at room center
   panRange: { min: -270, max: 270 },
   tiltRange: { min: -134, max: 134 },
