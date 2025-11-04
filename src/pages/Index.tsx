@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { FloorPlan } from '../components/FloorPlan';
 import { ControlPanel } from '../components/ControlPanel';
@@ -8,26 +7,22 @@ import { KeyboardShortcuts } from '../components/KeyboardShortcuts';
 import { useLightingStore } from '../stores/lightingStore';
 import { Badge } from '../components/ui/badge';
 import { Lightbulb, Target, Zap, Keyboard } from 'lucide-react';
-
 const Index = () => {
-  const { 
-    fixtures, 
-    selectedFixtures, 
+  const {
+    fixtures,
+    selectedFixtures,
     apiConfig,
     apiClient,
-    initializeApi 
+    initializeApi
   } = useLightingStore();
 
   // Initialize API connection on mount
   useEffect(() => {
     initializeApi(apiConfig.baseUrl);
   }, [initializeApi, apiConfig.baseUrl]);
-
   const activeFixtures = fixtures.filter(f => f.dimmer > 0).length;
   const selectedCount = selectedFixtures.length;
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  return <div className="min-h-screen bg-background flex flex-col">
       <KeyboardShortcuts />
       
       {/* Header */}
@@ -53,24 +48,18 @@ const Index = () => {
                   {activeFixtures}/6 active
                 </span>
               </div>
-              {selectedCount > 0 && (
-                <div className="flex items-center gap-2">
+              {selectedCount > 0 && <div className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   <span className="text-muted-foreground">
                     {selectedCount} selected
                   </span>
-                </div>
-              )}
+                </div>}
               <div className="flex items-center gap-2">
                 <Keyboard className="w-4 h-4" />
                 <span className="text-muted-foreground">1-6 keys</span>
               </div>
-              <div className={`px-2 py-1 rounded text-xs ${
-                (apiClient && apiClient.isConnected()) 
-                  ? 'bg-primary/20 text-primary' 
-                  : 'bg-destructive/20 text-destructive'
-              }`}>
-                {(apiClient && apiClient.isConnected()) ? 'Connected' : 'Disconnected'}
+              <div className={`px-2 py-1 rounded text-xs ${apiClient && apiClient.isConnected() ? 'bg-primary/20 text-primary' : 'bg-destructive/20 text-destructive'}`}>
+                {apiClient && apiClient.isConnected() ? 'Connected' : 'Disconnected'}
               </div>
             </div>
           </div>
@@ -108,22 +97,7 @@ const Index = () => {
       </div>
 
       {/* Enhanced Quick Help Overlay */}
-      <div className="fixed bottom-4 right-4 bg-card/90 backdrop-blur border border-border rounded-lg p-3 text-xs max-w-xs">
-        <div className="font-medium text-foreground mb-2 flex items-center gap-1">
-          <Keyboard className="w-3 h-3" />
-          Quick Controls
-        </div>
-        <div className="space-y-1 text-muted-foreground">
-          <div>• <kbd className="bg-muted px-1 rounded text-xs">1-6</kbd> Select fixtures</div>
-          <div>• <kbd className="bg-muted px-1 rounded text-xs">Shift+Click</kbd> Multi-select</div>
-          <div>• <kbd className="bg-muted px-1 rounded text-xs">Space</kbd> Full brightness</div>
-          <div>• <kbd className="bg-muted px-1 rounded text-xs">B</kbd> Blackout selected</div>
-          <div>• <kbd className="bg-muted px-1 rounded text-xs">Esc</kbd> Clear selection</div>
-          <div>• Click map to aim selected fixtures</div>
-        </div>
-      </div>
-    </div>
-  );
+      
+    </div>;
 };
-
 export default Index;
