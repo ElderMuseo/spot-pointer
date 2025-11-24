@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { LightingState, Fixture, Preset } from '../types/lighting';
 import { calculatePanTilt, degreesToPercent } from '../utils/geometry';
 import { GrandMA2ApiClient } from '../utils/grandma2-api';
+import defaultFloorPlanImage from '../assets/default-floor-plan.png';
 
 interface LightingStore extends LightingState {
   // Actions
@@ -79,7 +80,7 @@ const defaultFixtures: Fixture[] = fixturePositions.map(pos => ({
 export const useLightingStore = create<LightingStore>((set, get) => ({
   fixtures: defaultFixtures,
   floorPlan: {
-    image: null,
+    image: defaultFloorPlanImage,
     width: ROOM_WIDTH_X,
     height: ROOM_LENGTH_Y,
     calibrationPoints: [],
