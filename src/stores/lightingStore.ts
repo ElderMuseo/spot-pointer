@@ -25,6 +25,7 @@ interface LightingStore extends LightingState {
   deletePreset: (presetId: string) => void;
   updateApiConfig: (baseUrl: string, grandma2Host: string, grandma2Port: number) => void;
   setFloorPlan: (image: string, width: number, height: number) => void;
+  updateFloorPlanDimensions: (width: number, height: number) => void;
   updateFixtureHeight: (height: number) => void;
   updateFixturePosition: (id: number, x: number, y: number) => void;
   adjustFixtureSpacing: (spacing: number) => void;
@@ -348,6 +349,15 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
       width,
       height,
       pixelsPerMeter: 500 / Math.max(width, height) // Approximate scaling
+    }
+  })),
+
+  updateFloorPlanDimensions: (width, height) => set(state => ({
+    floorPlan: {
+      ...state.floorPlan,
+      width,
+      height,
+      pixelsPerMeter: 500 / Math.max(width, height)
     }
   })),
 
