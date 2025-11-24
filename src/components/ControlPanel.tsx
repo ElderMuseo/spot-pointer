@@ -27,6 +27,7 @@ export const ControlPanel: React.FC = () => {
     updateFrost,
     updateApiConfig,
     initializeApi,
+    updateFloorPlanDimensions,
     updateFixtureHeight,
     updateFixturePosition,
     adjustFixtureSpacing,
@@ -481,6 +482,51 @@ export const ControlPanel: React.FC = () => {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Room Dimensions */}
+            <div className="space-y-2">
+              <Label>Room Dimensions</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="room-width" className="text-xs text-muted-foreground">Width (m)</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      id="room-width"
+                      type="number"
+                      value={floorPlan.width}
+                      onChange={(e) => {
+                        const width = parseFloat(e.target.value) || 1;
+                        updateFloorPlanDimensions(width, floorPlan.height);
+                      }}
+                      placeholder="38"
+                      step="0.5"
+                      min="1"
+                      max="100"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="room-height" className="text-xs text-muted-foreground">Height (m)</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      id="room-height"
+                      type="number"
+                      value={floorPlan.height}
+                      onChange={(e) => {
+                        const height = parseFloat(e.target.value) || 1;
+                        updateFloorPlanDimensions(floorPlan.width, height);
+                      }}
+                      placeholder="35"
+                      step="0.5"
+                      min="1"
+                      max="100"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Fixture Height */}

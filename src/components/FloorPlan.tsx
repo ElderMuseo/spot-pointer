@@ -96,9 +96,9 @@ export const FloorPlan: React.FC = () => {
         const containerWidth = rect.width - 16; // Reduced padding
         const containerHeight = rect.height - 16; // Reduced padding
         
-        // Fixed floor plan dimensions: 38m × 35m
+        // Dynamic floor plan dimensions from floorPlan state
         // Canvas internal dimensions stay the same, rotation is visual only
-        const roomAspectRatio = 38 / 35;
+        const roomAspectRatio = floorPlan.width / floorPlan.height;
         const containerAspectRatio = containerWidth / containerHeight;
         
         let canvasWidth, canvasHeight;
