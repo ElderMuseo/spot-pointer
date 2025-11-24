@@ -39,7 +39,7 @@ interface LightingStore extends LightingState {
 const ROOM_WIDTH_X = 38;   // m (ancho)
 const ROOM_LENGTH_Y = 35;  // m (largo)
 const LIGHTS_Y = 15.51;    // m (from bottom edge)
-const LIGHTS_Z = 8.45;     // m (height)
+const LIGHTS_Z = 5;     // m (height)
 
 // Fixed fixture positions
 const fixturePositions = [
