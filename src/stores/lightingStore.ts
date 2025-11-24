@@ -21,7 +21,7 @@ interface LightingStore extends LightingState {
   updateZoom: (fixtureIds: number[], zoom: number) => void;
   updateFrost: (fixtureIds: number[], frost: number) => void;
   savePreset: (name: string, description: string) => void;
-  loadPreset: (presetId: string) => void;
+  loadPreset: (presetId: string) => Promise<void>;
   deletePreset: (presetId: string) => void;
   updateApiConfig: (baseUrl: string, grandma2Host: string, grandma2Port: number) => void;
   setFloorPlan: (image: string, width: number, height: number) => void;
@@ -324,14 +324,57 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     }));
   },
 
-  loadPreset: (presetId) => {
+  loadPreset: async (presetId) => {
     const state = get();
     const preset = state.presets.find(p => p.id === presetId);
     if (!preset) return;
     
+    // Update local state immediately
     set({
       fixtures: preset.fixtures.map(f => ({ ...f, isSelected: false, focus: f.focus || 50 }))
     });
+
+    // If API is not connected, just update local state
+    if (!state.apiClient) return;
+
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const DELAY_MS = 150; // Small delay between operations
+
+    // Get all fixture IDs
+    const fixtureIds = preset.fixtures.map(f => f.id);
+
+    try {
+      // 1. Color first
+      for (const fixture of preset.fixtures) {
+        state.apiClient.sendColor([fixture.id], fixture.color.r, fixture.color.g, fixture.color.b);
+      }
+      await delay(DELAY_MS);
+
+      // 2. Lighting parameters (Iris, Focus, Zoom, Frost)
+      for (const fixture of preset.fixtures) {
+        state.apiClient.sendIris([fixture.id], fixture.iris);
+        state.apiClient.sendFocus([fixture.id], fixture.focus || 50);
+        state.apiClient.sendZoom([fixture.id], fixture.zoom);
+        state.apiClient.sendFrost([fixture.id], fixture.frost);
+      }
+      await delay(DELAY_MS);
+
+      // 3. Position (Pan/Tilt)
+      const panTiltItems = preset.fixtures.map(f => ({
+        fixture: f.id,
+        pan: f.pan,
+        tilt: f.tilt
+      }));
+      state.apiClient.sendPanTiltBatch(panTiltItems);
+      await delay(DELAY_MS);
+
+      // 4. Dimmer last
+      for (const fixture of preset.fixtures) {
+        state.apiClient.sendDimmer([fixture.id], fixture.dimmer);
+      }
+    } catch (error) {
+      console.error('Error loading preset:', error);
+    }
   },
 
   deletePreset: (presetId) => set(state => ({
