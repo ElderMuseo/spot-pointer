@@ -305,6 +305,48 @@ export class GrandMA2ApiClient {
     }
   }
 
+  /**
+   * Load a complete preset using the /preset/load endpoint
+   * This endpoint handles the sequencing and delays automatically
+   * Sequence: 1. Color, 2. Lighting (iris/focus/zoom/frost), 3. Position (pan/tilt), 4. Dimmer
+   */
+  async loadPreset(items: Array<{
+    fixture: number;
+    r?: number;
+    g?: number;
+    b?: number;
+    iris?: number;
+    focus?: number;
+    zoom?: number;
+    frost?: number;
+    pan?: number;
+    tilt?: number;
+    dim?: number;
+  }>, delay: number = 3.0): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/preset/load`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, delay })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Preset loaded successfully with ${items.length} fixtures`);
+      } else {
+        throw new Error(result.error || 'Preset load failed');
+      }
+    } catch (error) {
+      this.log(`Preset load error: ${error}`);
+      throw error;
+    }
+  }
+
   private log(message: string): void {
     console.log(`[GrandMA2API] ${message}`);
     this.onLog?.(message);

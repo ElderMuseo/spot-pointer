@@ -338,41 +338,24 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
     // If API is not connected, just update local state
     if (!state.apiClient) return;
 
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    const DELAY_MS = 150; // Small delay between operations
-
-    // Get all fixture IDs
-    const fixtureIds = preset.fixtures.map(f => f.id);
-
     try {
-      // 1. Color first
-      for (const fixture of preset.fixtures) {
-        state.apiClient.sendColor([fixture.id], fixture.color.r, fixture.color.g, fixture.color.b);
-      }
-      await delay(DELAY_MS);
-
-      // 2. Lighting parameters (Iris, Focus, Zoom, Frost)
-      for (const fixture of preset.fixtures) {
-        state.apiClient.sendIris([fixture.id], fixture.iris);
-        state.apiClient.sendFocus([fixture.id], fixture.focus || 50);
-        state.apiClient.sendZoom([fixture.id], fixture.zoom);
-        state.apiClient.sendFrost([fixture.id], fixture.frost);
-      }
-      await delay(DELAY_MS);
-
-      // 3. Position (Pan/Tilt)
-      const panTiltItems = preset.fixtures.map(f => ({
-        fixture: f.id,
-        pan: f.pan,
-        tilt: f.tilt
+      // Build items array for the preset/load endpoint
+      const items = preset.fixtures.map(fixture => ({
+        fixture: fixture.id,
+        r: Math.round((fixture.color.r / 255) * 100),
+        g: Math.round((fixture.color.g / 255) * 100),
+        b: Math.round((fixture.color.b / 255) * 100),
+        iris: fixture.iris,
+        focus: fixture.focus || 50,
+        zoom: fixture.zoom,
+        frost: fixture.frost,
+        pan: fixture.pan,
+        tilt: fixture.tilt,
+        dim: fixture.dimmer
       }));
-      state.apiClient.sendPanTiltBatch(panTiltItems);
-      await delay(DELAY_MS);
 
-      // 4. Dimmer last
-      for (const fixture of preset.fixtures) {
-        state.apiClient.sendDimmer([fixture.id], fixture.dimmer);
-      }
+      // Use the new preset/load endpoint with automatic sequencing and delays
+      await state.apiClient.loadPreset(items, 3.0);
     } catch (error) {
       console.error('Error loading preset:', error);
     }
