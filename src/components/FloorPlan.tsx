@@ -6,6 +6,8 @@ import { pixelToReal, realToPixel, calculateLightCone } from '../utils/geometry'
 export const FloorPlan: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   
   const {
     fixtures,
@@ -87,6 +89,26 @@ export const FloorPlan: React.FC = () => {
   };
 
 
+  // Preload image when floorPlan.image changes
+  useEffect(() => {
+    if (floorPlan.image) {
+      setImageLoaded(false);
+      const img = new Image();
+      img.onload = () => {
+        imageRef.current = img;
+        setImageLoaded(true);
+      };
+      img.onerror = () => {
+        imageRef.current = null;
+        setImageLoaded(true);
+      };
+      img.src = floorPlan.image;
+    } else {
+      imageRef.current = null;
+      setImageLoaded(true);
+    }
+  }, [floorPlan.image]);
+
   // Update canvas size based on container
   useEffect(() => {
     const updateCanvasSize = () => {
@@ -124,7 +146,7 @@ export const FloorPlan: React.FC = () => {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, []);
+  }, [floorPlan.width, floorPlan.height]);
 
   // Draw the floor plan
   useEffect(() => {
@@ -134,6 +156,9 @@ export const FloorPlan: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Wait for image to load before drawing
+    if (floorPlan.image && !imageLoaded) return;
+
     // Canvas dimensions match floor plan (rotation is only visual)
     const pixelsPerMeter = canvasSize.width / floorPlan.width;
 
@@ -142,25 +167,20 @@ export const FloorPlan: React.FC = () => {
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
 
     // Draw background image if available
-    if (floorPlan.image) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.save();
-        ctx.globalAlpha = 0.7;
-        
-        // Rotate image 90° counter-clockwise to match canvas rotation
-        ctx.translate(canvasSize.width / 2, canvasSize.height / 2);
-        ctx.rotate(-90 * Math.PI / 180);
-        ctx.drawImage(img, -canvasSize.height / 2, -canvasSize.width / 2, canvasSize.height, canvasSize.width);
-        
-        ctx.restore();
-        ctx.globalAlpha = 1;
-        drawOverlay();
-      };
-      img.src = floorPlan.image;
-    } else {
-      drawOverlay();
+    if (imageRef.current) {
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      
+      // Rotate image 90° counter-clockwise to match canvas rotation
+      ctx.translate(canvasSize.width / 2, canvasSize.height / 2);
+      ctx.rotate(-90 * Math.PI / 180);
+      ctx.drawImage(imageRef.current, -canvasSize.height / 2, -canvasSize.width / 2, canvasSize.height, canvasSize.width);
+      
+      ctx.restore();
+      ctx.globalAlpha = 1;
     }
+    
+    drawOverlay();
 
     function drawOverlay() {
       // Draw grid
@@ -332,7 +352,7 @@ export const FloorPlan: React.FC = () => {
         ctx.stroke();
       }
     }
-  }, [fixtures, floorPlan, selectedFixtures, targetPoint, canvasSize]);
+  }, [fixtures, floorPlan, selectedFixtures, targetPoint, canvasSize, imageLoaded]);
 
   return (
     <div className="relative flex bg-card rounded-lg border border-border items-center justify-center w-full h-full" style={{ 
