@@ -21,6 +21,8 @@ interface LightingStore extends LightingState {
   updateFocus: (fixtureIds: number[], focus: number) => void;
   updateZoom: (fixtureIds: number[], zoom: number) => void;
   updateFrost: (fixtureIds: number[], frost: number) => void;
+  parkFixtures: (fixtureIds: number[]) => Promise<void>;
+  unparkFixtures: (fixtureIds: number[]) => Promise<void>;
   savePreset: (name: string, description: string) => void;
   loadPreset: (presetId: string) => Promise<void>;
   deletePreset: (presetId: string) => void;
@@ -67,6 +69,7 @@ const defaultFixtures: Fixture[] = fixturePositions.map(pos => ({
   focus: 50,
   frost: 0,
   isSelected: false,
+  isParked: false,
   targetX: pos.x,
   targetY: ROOM_LENGTH_Y / 2, // Default target at room center
   panRange: { min: -270, max: 270 },
@@ -308,6 +311,44 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
         fixtureIds.includes(f.id) ? { ...f, frost } : f
       )
     }));
+  },
+
+  parkFixtures: async (fixtureIds) => {
+    const state = get();
+    
+    // Send park command to API if connected
+    if (state.apiClient) {
+      try {
+        await state.apiClient.parkFixtures(fixtureIds);
+        // Update local state to mark fixtures as parked
+        set(state => ({
+          fixtures: state.fixtures.map(f => 
+            fixtureIds.includes(f.id) ? { ...f, isParked: true } : f
+          )
+        }));
+      } catch (error) {
+        console.error('Error parking fixtures:', error);
+      }
+    }
+  },
+
+  unparkFixtures: async (fixtureIds) => {
+    const state = get();
+    
+    // Send unpark command to API if connected
+    if (state.apiClient) {
+      try {
+        await state.apiClient.unparkFixtures(fixtureIds);
+        // Update local state to mark fixtures as unparked
+        set(state => ({
+          fixtures: state.fixtures.map(f => 
+            fixtureIds.includes(f.id) ? { ...f, isParked: false } : f
+          )
+        }));
+      } catch (error) {
+        console.error('Error unparking fixtures:', error);
+      }
+    }
   },
 
   savePreset: (name, description) => {
