@@ -17,6 +17,7 @@ export interface Fixture {
   focus: number; // Focus (0-100%)
   frost: number; // Frost/diffusion (0-100%)
   isSelected: boolean;
+  isParked: boolean; // Whether fixture is locked/parked
   // Individual target point for this fixture
   targetX: number;
   targetY: number;

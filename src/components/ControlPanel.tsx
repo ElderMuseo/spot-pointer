@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
 import { useLightingStore } from '../stores/lightingStore';
 import { FloorPlanUpload } from './FloorPlanUpload';
-import { Lightbulb, Palette, Circle, Settings, Wifi, WifiOff } from 'lucide-react';
+import { Lightbulb, Palette, Circle, Settings, Wifi, WifiOff, Lock, Unlock } from 'lucide-react';
 
 export const ControlPanel: React.FC = () => {
   const {
@@ -25,6 +25,8 @@ export const ControlPanel: React.FC = () => {
     updateFocus,
     updateZoom,
     updateFrost,
+    parkFixtures,
+    unparkFixtures,
     updateApiConfig,
     initializeApi,
     updateFloorPlanDimensions,
@@ -344,6 +346,38 @@ export const ControlPanel: React.FC = () => {
                   Blackout
                 </Button>
               </div>
+            </div>
+
+            {/* Park/Unpark Controls */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Fixture Lock</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => hasSelection && parkFixtures(selectedFixtures)}
+                  disabled={!hasSelection || !apiClient?.isConnected()}
+                >
+                  <Lock className="w-3 h-3" />
+                  Bloquear
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => hasSelection && unparkFixtures(selectedFixtures)}
+                  disabled={!hasSelection || !apiClient?.isConnected()}
+                >
+                  <Unlock className="w-3 h-3" />
+                  Desbloquear
+                </Button>
+              </div>
+              {hasSelection && selectedFixtureData.some(f => f.isParked) && (
+                <p className="text-xs text-amber-500">
+                  ⚠️ Algunos fixtures están bloqueados
+                </p>
+              )}
             </div>
           </TabsContent>
 

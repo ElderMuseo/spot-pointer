@@ -347,6 +347,64 @@ export class GrandMA2ApiClient {
     }
   }
 
+  /**
+   * Park (lock) fixtures
+   * @param fixtureIds - Array of fixture IDs to park
+   */
+  async parkFixtures(fixtureIds: number[]): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/park`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fixtures: fixtureIds })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Parked fixtures ${fixtureIds.join(',')}`);
+      } else {
+        throw new Error(result.error || 'Park command failed');
+      }
+    } catch (error) {
+      this.log(`Park error: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Unpark (unlock) fixtures
+   * @param fixtureIds - Array of fixture IDs to unpark
+   */
+  async unparkFixtures(fixtureIds: number[]): Promise<void> {
+    if (!this.connected) {
+      this.log('Not connected - skipping command');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/unpark`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fixtures: fixtureIds })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        this.log(`Unparked fixtures ${fixtureIds.join(',')}`);
+      } else {
+        throw new Error(result.error || 'Unpark command failed');
+      }
+    } catch (error) {
+      this.log(`Unpark error: ${error}`);
+      throw error;
+    }
+  }
+
   private log(message: string): void {
     console.log(`[GrandMA2API] ${message}`);
     this.onLog?.(message);
