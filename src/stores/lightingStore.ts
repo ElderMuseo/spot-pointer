@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { LightingState, Fixture, Preset } from '../types/lighting';
 import { calculatePanTilt, degreesToPercent } from '../utils/geometry';
 import { GrandMA2ApiClient } from '../utils/grandma2-api';
@@ -80,27 +81,29 @@ const defaultFixtures: Fixture[] = fixturePositions.map(pos => ({
   tiltInverted: true // Match Python INVERT_TILT = True
 }));
 
-export const useLightingStore = create<LightingStore>((set, get) => ({
-  fixtures: defaultFixtures,
-  floorPlan: {
-    image: defaultFloorPlanImage,
-    width: ROOM_WIDTH_X,
-    height: ROOM_LENGTH_Y,
-    calibrationPoints: [],
-    pixelsPerMeter: 20
-  },
-  selectedFixtures: [],
-  presets: [],
-  apiConfig: {
-    baseUrl: 'http://localhost:8000',
-    grandma2Host: '192.168.1.100',
-    grandma2Port: 30000,
-  },
-  scale: 0.5,
-  targetPoint: null,
-  apiClient: null,
+export const useLightingStore = create<LightingStore>()(
+  persist(
+    (set, get) => ({
+      fixtures: defaultFixtures,
+      floorPlan: {
+        image: defaultFloorPlanImage,
+        width: ROOM_WIDTH_X,
+        height: ROOM_LENGTH_Y,
+        calibrationPoints: [],
+        pixelsPerMeter: 20
+      },
+      selectedFixtures: [],
+      presets: [],
+      apiConfig: {
+        baseUrl: 'http://localhost:8000',
+        grandma2Host: '192.168.1.100',
+        grandma2Port: 30000,
+      },
+      scale: 0.5,
+      targetPoint: null,
+      apiClient: null,
 
-  selectFixture: (id, multi = false) => set(state => {
+      selectFixture: (id, multi = false) => set(state => {
     if (multi) {
       // Multi-selection mode - toggle the fixture
       const isCurrentlySelected = state.selectedFixtures.includes(id);
@@ -497,4 +500,13 @@ export const useLightingStore = create<LightingStore>((set, get) => ({
 
     return connected;
   },
-}));
+    }),
+    {
+      name: 'lighting-store',
+      partialize: (state) => ({
+        presets: state.presets,
+        apiConfig: state.apiConfig,
+      }),
+    }
+  )
+);
